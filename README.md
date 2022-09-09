@@ -11,7 +11,7 @@ Release:	18.04
 Codename:	bionic
 ```
 
-### python仮想環境の作成
+## python仮想環境の作成
 
 * ホームにサブディレクトリ py_venv を作成し、その中に Python仮想環境名 **py_matplotlib** を作成  
 python3 **-m venv** py_matplotlib
@@ -33,5 +33,5 @@ $ cd py_venv
 (py_matplotlib) ~/py_venv$ pip install matplotlib pandas
 ```
 
-[01 Matplotlibに日本語フォントを表示する](useCjkFont/README.md#01-matplotlibに日本語フォントを表示する)
+[01 Matplotlibに日本語フォントを表示する](01_useCjkFont/README.md#01-matplotlibに日本語フォントを表示する)
 
