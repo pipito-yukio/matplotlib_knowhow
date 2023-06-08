@@ -86,6 +86,8 @@ src/useCjkFont/
 <img src="images/plotweather_02_multiFont_edit.png" width="550">
 </div>
 
+>コードの説明は下記コンテンツ(Github Pages)をご覧ください  
+https://github.com/pipito-yukio/matplotlib_knowhow/blob/main/docs/01_useCjkFont.html  
 
 ### 4. 健康管理アプリ
 
