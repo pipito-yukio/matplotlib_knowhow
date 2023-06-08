@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="assets/css/bootstrap_custom.css" />
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="assets/highlight/styles/default.min.css" />
+        <title>01 Matplotlibに日本語フォントを表示する</title>
+        <meta name="description" content="Display Japanese font in Matplotlib.">
+    </head>
+
+    <body>
+        <div class="container" style="max-width: 980px">
+            <h4 class="m-2 text-center">01 Matplotlibに日本語フォントを表示する</h4>
+            <hr />
+            <div class="update-date">【最終更新日】2023-06-08</div>
+            <p class="indent">
+                Matplotlibで複数の日本語フォントを表示する方法について解説します。
+            </p>
+            <!-- refercence urls -->
+            <div class="m-2 mb-4">
+                <p class="small">【参考URL】</p>
+                <ul class="ms-2 small">
+                    <li>(1) Matplotlib 本家サイト <b>Configuring the font family</b><br/>
+    <a href="https://matplotlib.org/3.1.0/gallery/text_labels_and_annotations/font_family_rc_sgskip.html" target="_blank">
+        https://matplotlib.org/3.1.0/gallery/text_labels_and_annotations/font_family_rc_sgskip.html
+    </a>
+                    </li>
+                    <li>(2) Matplotlib 本家サイト <b>matplotlib.legend</b><br/>
+    <a href="https://matplotlib.org/stable/api/legend_api.html" target="_blank">
+        https://matplotlib.org/stable/api/legend_api.html
+    </a>
+                    </li>
+                    <li>(3) 参考サイト <b>Matplotlib set_xticklabels</b><br/>
+    <a href="https://pythonguides.com/matplotlib-set_xticklabels/" target="_blank">
+        https://pythonguides.com/matplotlib-set_xticklabels/
+    </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="m-2 mb-4">
+                <p class="small">【サンプルデータ】weather_20220903.csv ※気象センサーから10分毎にUDPパケットを受信したデータ</p>
+                <ul class="ms-2 small">
+                    <li>PCのDownloadsディレクトリにサブディレクトリ csv を作成する</li>
+                    <li>リポジトリのサンプルデータのCSVをPCの~/Downloads/csv/にコピーする</li>
+                    <li>サンプルの気象データは 2022-09-03 の観測データ</li>
+                </ul>
+                <div class="ms-3 small">"did"列(センサーデバイスID)はここでは無視し、残りのデータを使用します</div>
+<pre class="ms-3"><code class="small">"did","measurement_time","temp_out","temp_in","humid","pressure"
+1,"2022-09-03 00:01:54",14.9,22.4,49.2,1015.5
+1,"2022-09-03 00:11:38",15.0,22.4,49.3,1015.5
+1,"2022-09-03 00:21:21",14.9,22.4,49.0,1015.6
+1,"2022-09-03 00:31:05",15.0,22.3,49.2,1015.6
+1,"2022-09-03 00:40:48",14.9,22.3,48.9,1015.8
+1,"2022-09-03 00:50:32",14.8,22.3,48.8,1015.9
+1,"2022-09-03 01:00:15",14.6,22.3,48.7,1015.9
+...省略...    
+1,"2022-09-03 19:09:21",19.8,24.9,47.4,1015.0
+1,"2022-09-03 19:19:06",19.7,24.9,47.5,1015.2
+1,"2022-09-03 19:28:49",19.6,24.9,47.5,1015.3
+1,"2022-09-03 19:38:31",19.5,25.0,47.5,1015.4</code></pre>                
+            </div>
+
+            <div class="m-2 mb-4">
+                <p class="small">【インストール済みフォント】利用する日本語フォント: <b>IPAexGothic, IPAexMincho, Noto Sans CJK JP</b></p>
+<pre><code class="small">$ fc-list | grep "IPAex"
+/home/yukio/.local/share/fonts/ipaexm.ttf: IPAex明朝,IPAexMincho:style=Regular
+/home/yukio/.local/share/fonts/ipaexg.ttf: IPAexゴシック,IPAexGothic:style=Regular
+$ fc-list | grep "Noto Sans CJK JP"
+/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc: Noto Sans CJK JP:style=Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc: Noto Sans CJK JP,Noto Sans CJK JP Medium:style=Medium,Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-DemiLight.ttc: Noto Sans CJK JP,Noto Sans CJK JP DemiLight:style=DemiLight,Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-Thin.ttc: Noto Sans CJK JP,Noto Sans CJK JP Thin:style=Thin,Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-Light.ttc: Noto Sans CJK JP,Noto Sans CJK JP Light:style=Light,Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc: Noto Sans CJK JP,Noto Sans CJK JP Black:style=Black,Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans CJK JP:style=Bold
+</code></pre>                
+            </div>
+
+            <h5 class="v-line-start">1.単一の日本語フォントを設定する</h5>
+            <div class="m-3 mb-5">
+                <div class="m-2">
+                    <figure class="figure">
+                        <figcaption class="figure-caption text-center">
+                            【指定した日付の気象データ (気温、室内湿度、気圧) プロット】
+                        </figcaption>
+                        <img class="figure-img img-fluid" src="01_useCjkFont/images/plotweather_01_singleFont_edit.png" />
+                    </figure>
+                </div>
+            
+                <div class="mb-2">1-1. コードで設定する方法</div>
+                <p class="small">【参考URL】の(1)のコード例は以下のとおり</p>
+                <ul>
+                    <li>1〜4行目のコードをそのまま利用</li>
+                    <li>3行目: ['Tahoma'] を自身のPCにインストールされている日本語フォント名に置き換える</li>
+                </ul>
+<pre><code class="small python">from matplotlib import rcParams
+rcParams['font.family'] = 'sans-serif'
+rcParams['font.sans-serif'] = ['Tahoma']  # このフォント名を入れ替える
+import matplotlib.pyplot as plt
+    
+fig, ax = plt.subplots()
+ax.plot([1, 2, 3], label='test')
+    
+ax.legend()
+plt.show()</code></pre>
+
+                <div class="ms-2">
+                    <p>[ソース] src/useCjkFont/plotterweather_singlefont.py</p>
+                    <div class="ms-2">
+                        <div class="small">(1) インポートとフォント設定</div>
+<pre><code class="small python">import argparse
+import base64
+import os
+from datetime import datetime, timedelta
+from io import BytesIO
+
+import pandas as pd
+from matplotlib import rcParams
+# 日本語フォントを設定
+rcParams['font.family'] = 'sans-serif'
+rcParams['font.sans-serif'] = ['IPAexGothic']  # ここをインストールしているフォント名に置き換える
+import matplotlib.dates as mdates
+from matplotlib.figure import Figure
+from matplotlib.pyplot import setp</code></pre>
+
+                        <div class="small">(2) 定数定義</div>
+<pre><code class="small python">WEATHER_IDX_COLUMN = 'measurement_time'  # DataFrameのインデックス(CSVファイル)
+LABEL_FONTSIZE = 10
+GRID_STYLES = {"linestyle": "- -", "linewidth": 1.0}
+
+FMT_JP_DATE = "%Y年%m月%d日"
+# datetime.weekday(): 月:0, 火:1, ..., 日:6
+LIST_DAY_WEEK_JP = ["月", "火", "水", "木", "金", "土", "日"]
+</code></pre>                                        
+
+                        <div class="small">(3) 描画以外の関数の用途</div>
+                        <ul class="small">
+                            <li>引数の日付文字列の翌日(デフォルト)を計算する
+<pre><code class="python">def addDayToString(s_date, add_days=1, fmt_date="%Y-%m-%d"):
+    """
+    日付文字列に加算日数を加えた日付文字列を出力日付書式に従って返却する
+    (例) '2022-08-30' + 2日 -> '2022-09-01'
+    :param s_date: 日付文字列
+    :param add_days: 加算日数 ※マイナス日数の場合
+    :param fmt_date: 出力日付書式
+    :return: 出力日付書式の加算日付文字列
+    """
+    dt = datetime.strptime(s_date, fmt_date)
+    dt += timedelta(days=add_days)
+    s_next = dt.strftime(fmt_date)
+    return s_next</code></pre>
+                            </li>
+                            <li>日付文字列に時刻(初期値: "00:00:00")を付加した日付(datetime)オブジェクトを生成する<br/>
+                               【x軸の範囲指定で使用】"当日 00:00:00" 〜 "翌日 00:00:00" を計算
+<pre><code class="python">def strDateToDatetimeTime000000(s_date):
+    """
+    日付文字列の "00:00:00"のdatetimeブジェクトを返却する
+    :param s_date: 日付文字列
+    :return: datetimeブジェクト
+    """
+    return datetime.strptime(s_date + " 00:00:00", "%Y-%m-%d %H:%M:%S")</code></pre>
+                            </li>
+                            <li>タイトル用の日本語日付(曜日)を生成する
+<pre><code class="python">def datetimeToJpDateWithWeek(cur_datetime):
+    """
+    日本語の曜日を含む日付を返却する
+    (例) 2022-09-09 -> 2022年09月09日 (金)
+    :param cur_datetime:日付
+    :return: 日本語の曜日を含む日付
+    """
+    s_date = cur_datetime.strftime(FMT_JP_DATE)
+    idx_week = cur_datetime.weekday()
+    return "{} ({})".format(s_date, LIST_DAY_WEEK_JP[idx_week])</code></pre>                                        
+                            </li>
+                        </ul>
+
+                        <div class="small">(4) 描画関数</div>
+                        <ul class="small">
+                            <li>温度サブプロット領域に温度データをプロット
+                                <ul>
+                                    <li>DataFrameの外気温・室内気温列(測定データ)をプロット(折れ線グラフ) ※マーカー無し</li>
+                                    <li>Y軸(温度)の範囲<b>[-20, 40]</b>を設定</li>
+                                    <li>プロット領域のタイトルを設定</li>
+                                    <li><b>X軸を隠す ※気圧プロット領域のX軸を共有 ★★</b><br/>
+                                        <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.label_outer.html" target="_blank">
+                                            https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.label_outer.html
+                                        </a>
+                                    </li>
+                                </ul>    
+<pre><code class="python">def _axesTemperatureSetting(ax, df, titleDate):
+    """
+    温度サブプロット(axes)にタイトル、軸・軸ラベルを設定し、
+    DataFrameオプジェクトの外気温・室内気温データをプロットする
+    :param ax:温度サブプロット(axes)
+    :param df:DataFrameオプジェクト
+    :param titleDate: タイトル日付文字列
+    """
+    ax.plot(df[WEATHER_IDX_COLUMN], df["temp_out"], color="blue", marker="", label="外気温")
+    ax.plot(df[WEATHER_IDX_COLUMN], df["temp_in"], color="red", marker="", label="室内気温")
+    ax.set_ylim([-20, 40])
+    ax.set_ylabel("気温 (℃)", fontsize=LABEL_FONTSIZE)
+    ax.legend(loc="best")
+    ax.set_title("気象データ：{}".format(titleDate))
+    # Hide xlabel
+    ax.label_outer()   # ★★
+    ax.grid(GRID_STYLES)</code></pre>                                
+                            </li>
+                            <li>湿度サブプロット領域に室内湿度データをプロット
+                                <ul>
+                                    <li>DataFrameの室内湿度列(測定データ)をプロット(折れ線グラフ) ※マーカー無し</li>
+                                    <li>Y軸(温度)の範囲<b>[0, 100]</b>を設定</li>
+                                    <li><b>X軸を隠す ※気圧プロット領域のX軸を共有</b></li>
+                                </ul>
+<pre><code class="python">def _axesHumidSetting(ax, df):
+    """
+    湿度サブプロット(axes)に軸・軸ラベルを設定し、DataFrameオプジェクトの室内湿度データをプロットする
+    :param ax:湿度サブプロット(axes)
+    :param df:DataFrameオプジェクト
+    """
+    ax.plot(df[WEATHER_IDX_COLUMN], df["humid"], color="green", marker="")
+    ax.set_ylim([0, 100])
+    ax.set_ylabel("室内湿度 (％)", fontsize=LABEL_FONTSIZE)
+    # Hide xlabel
+    ax.label_outer()
+    ax.grid(GRID_STYLES)</code></pre>
+                            </li>
+                            <li>気圧サブプロット領域に気圧データをプロット
+                                <ul>
+                                    <li>DataFrameの気圧列(測定データ)をプロット(折れ線グラフ) ※マーカー無し</li>
+                                    <li><b>X軸フォーマット: 軸ラベルは時間 (00,03,06,09,12,15,18,21,翌日の00)</b></li>
+                                    <li>Y軸(気圧)の範囲<b>[960, 1030]</b>を設定</li>
+                                </ul>
+<pre><code class="python">def _axesPressureSetting(ax, df):
+    """
+    気圧サブプロット(axes)に軸・軸ラベルを設定し、DataFrameオプジェクトの気圧データをプロットする
+    :param ax:湿度サブプロット(axes)
+    :param df:DataFrameオプジェクト
+    """
+    ax.plot(df[WEATHER_IDX_COLUMN], df["pressure"], color="fuchsia", marker="")
+    # 気圧 (hPa]: 軸ラベルは時間 (00,03,06,09,12,15,18,21,翌日の00)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H"))
+    ax.set_ylim([960, 1030])
+    ax.set_ylabel("hPa", fontsize=LABEL_FONTSIZE)
+    ax.grid(GRID_STYLES)</code></pre>                                            
+                            </li>
+                        </ul>
+
+                        <div class="small">(5) データプロットメイン関数</div>
+                        <ul class="ms-3 small">
+                            <li>気象データファイル(CSV)からpandasのDataFrameを生成する
+<pre><code>df = pd.read_csv(csv_file,
+                header=0,
+                parse_dates=[WEATHER_IDX_COLUMN],
+                names=[WEATHER_IDX_COLUMN, 'temp_out', 'temp_in', 'humid', 'pressure']
+                )</code></pre>
+                            </li>
+                            <li>測定時刻列("measurement_time")をDataFrameのインデックスに設定する
+<pre><code>df.index = df[WEATHER_IDX_COLUMN] # WEATHER_IDX_COLUMN="measurement_time"</code></pre>
+                            </li>
+                            <li>X軸の開始時刻(当日の"00:00:00")と終了時刻(翌日の"00:00:00")を計算する</li>
+                            <li>描画領域を生成する(11 x 8インチ)</li>
+                            <li>X軸を共有する3行1列のサププロット領域 (気温・湿度・気圧) を生成する</li>
+                            <li>各サププロット領域のX軸ラベルのフォントサイズを設定する</li>
+                            <li>各サププロット領域のX軸の範囲を設定する: 当日の"00"時 から 翌日の"00"時 迄</li>
+                            <li>気温サブプロット領域を描画する</li>
+                            <li>湿度サブプロット領域を描画する</li>
+                            <li>気圧サブプロット領域を描画する</li>
+                            <li>描画領域(画像)をバイトストリームに出力する
+<pre><code>buf = BytesIO()
+fig.savefig(buf, format="png", bbox_inches="tight")</code></pre>
+                            </li>
+                            <li>バイトストリームをbase64エンコードしHTML用イメージ文字列を生成し返却する
+<pre><code>data = base64.b64encode(buf.getbuffer()).decode("ascii")
+img_tag = '&lt;img src="data:image/png;base64,{}"&gt;'.format(data)</code></pre>
+                            </li>
+                        </ul>
+<pre class="ms-3"><code class="small python">def gen_plot_imagetag(csv_file, str_today="now"):
+    """
+    気象データCSVファイルからMatplotlib画像を生成し、img タグを含むHTML文字列を返却する
+    :param csv_file:CSVファイルパス
+    :param str_today:当日を表す日付文字列: "now"なら今日, それ以外は有効な日付文字列(YYYY-mm-DD)
+    :return: img タグを含むhtml文字列
+    """
+    # CSVファイルからDataFrameを生成
+    df = pd.read_csv(csv_file,
+                     header=0,
+                     parse_dates=[WEATHER_IDX_COLUMN],
+                     names=[WEATHER_IDX_COLUMN, 'temp_out', 'temp_in', 'humid', 'pressure']
+                     )
+    # タイムスタンプをデータフレームのインデックスに設定
+    df.index = df[WEATHER_IDX_COLUMN]
+
+    if str_today == "now":
+        first_datetime = datetime.now()
+    else:
+        # 指定された日付="YYYY-MM-DD"
+        first_datetime = datetime.strptime(str_today, "%Y-%m-%d")
+    # 当日の日付文字列 ※一旦 dateオブジェクトに変換して"年月日"を取得
+    s_first_date = first_datetime.date().isoformat()
+    # 表示範囲：当日の "00:00:00" から
+    x_day_min = strDateToDatetimeTime000000(s_first_date)
+    # 翌日の "00:00:00" 迄
+    s_nextday = addDayToString(s_first_date)
+    x_day_max = strDateToDatetimeTime000000(s_nextday)
+    # タイトル用の日本語日付(曜日)
+    title_date = datetimeToJpDateWithWeek(first_datetime)
+
+    # 描画領域生成: 11 x 8インチ
+    fig = Figure(figsize=[11, 8])
+    # x軸を共有する3行1列のサププロット領域生成
+    (ax_temp, ax_humid, ax_pressure) = fig.subplots(3, 1, sharex=True)
+
+    # サブプロット間の間隔を変更する
+    fig.subplots_adjust(wspace=0.1, hspace=0.1)
+    # 軸ラベルのフォントサイズを設定
+    for ax in [ax_temp, ax_humid, ax_pressure]:
+        setp(ax.get_xticklabels(), fontsize=9)
+        setp(ax.get_yticklabels(), fontsize=9)
+
+    # 1日データx軸の範囲: 当日 00時 から 翌日 00時
+    for ax in [ax_temp, ax_humid, ax_pressure]:
+        ax.set_xlim([x_day_min, x_day_max])
+
+    # サブプロットの設定
+    # 1.外気温と室内気温
+    _axesTemperatureSetting(ax_temp, df, title_date)
+    # 2.室内湿度
+    _axesHumidSetting(ax_humid, df)
+    # 3.気圧
+    _axesPressureSetting(ax_pressure, df)
+
+    # 画像をバイトストリームに溜め込みそれをbase64エンコードしてレスポンスとして返す
+    buf = BytesIO()
+    fig.savefig(buf, format="png", bbox_inches="tight")
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    img_tag = '&lt;img src="data:image/png;base64,{}"&gt;'.format(data)
+    return img_tag</code></pre>    
+
+                    <div class="small">(6) スクリプトメイン</div>
+                    <ul class="small">
+                        <li>コマンドラインオプション (入力例) <b>--csv-path</b> ~/Documents/csv/weather_20220903.csv <b>--today-date</b> 2022-09-03
+                            <ul>
+                                <li>CSVファイルパス: --csv-path</li>
+                                <li>HTML用画像Tag(Base64エンコード文字列)ファイルパス: --output-dir ※省略可</li>
+                                <li>当日日付: --today-date ※提供したCSVの場合は "2022-09-03"</li>
+                            </ul>
+                        </li>
+                        <li>出力先</li>
+                        <li>CSVファイルからHTML用画像TAG文字列を生成し出力先に保存 ※ブラウザで確認できる</li>
+                    </ul>
+<pre class="ms-3"><code class="small python">if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--csv-path", type=str, required=True, help="Weather data csv file of absolute path.")
+    parser.add_argument("--output-dir", type=str, help="Output HTML directory.")
+    parser.add_argument("--today-date", type=str, help="CSV data date: 'now' or 'YYYY-mm-DD'.")
+    args = parser.parse_args()
+
+    csv_file = os.path.join(os.path.expanduser(args.csv_path))
+    if not os.path.exists(csv_file):
+        print("{} is not found!".format(csv_file))
+        exit(1)
+
+    file_name = os.path.basename(csv_file)
+    name_only = os.path.splitext(file_name)[0]
+    html_name = name_only + "_singleFont.html"
+    if args.output_dir is None:
+        save_dir = os.path.dirname(csv_file)
+        html_path = os.path.join(save_dir, html_name)
+    else:
+        if not not os.path.exists(args.output_dir) or not os.path.isdir(args.output_dir):
+            print("{} is not valid output directory!".format(args.output_dir))
+            exit(1)
+        html_path = os.path.join(args.output_path, html_name)
+
+    today_date = args.today_date
+    if today_date is None or (today_date is not None and today_date == 'now'):
+        img_tag = gen_plot_imagetag(csv_file)
+    else:
+        try:
+            datetime.strptime(today_date, "%Y-%m-%d")
+        except ValueError:
+            print("today-date is 'YYYY-MM-DD'")
+            exit(1)
+        img_tag = gen_plot_imagetag(csv_file, str_today=today_date)
+
+    with open(html_path, 'w') as fp:
+        fp.write(img_tag)
+    print("Saved: {}".format(html_path))</code></pre>    
+
+                    <div class="small">(7) スクリプト実行</div>
+<pre><code class="samll">(py_matplotlib) $ python plotterweather_singlefont.py --csv-path ~/Downloads/csv/weather_20220903.csv --today-date 2022-09-03
+Saved: /home/yukio/Downloads/csv/weather_20220903_singleFont.html</code></pre>                    
+                </div>
+
+                <div class="mb-2">1-2. matplotlibrc ファイルを利用する方法</div>
+                <div class="ms-2">
+                    <dl class="small">
+                        <dt>(参考URL) 本家サイト: Customizing Matplotlib with style sheets and rcParams [The matplotlibrc file]</b></dt>
+                        <dd class="ms-3">
+                            <a href="https://matplotlib.org/stable/tutorials/introductory/customizing.html" target="_blank">https://matplotlib.org/stable/tutorials/introductory/customizing.html</a>
+                        </dd>
+                    </dl>
+                    <ul class="small">
+                        <li>(1) matplotlibrc ファイルの格納箇所の確認
+<pre><code class="small">(py_matplotlib) $ python
+Python 3.8.10 (default, Mar 13 2023, 10:26:41) 
+[GCC 9.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import matplotlib
+>>> matplotlib.matplotlib_fname()
+'/home/yukio/py_venv/py_matplotlib/lib/python3.8/site-packages/matplotlib/mpl-data/matplotlibrc'
+>>> quit()</code></pre>
+                        </li>
+                        <li>(2) matplotlibrcファイルを ~/Documents にコピーする
+<pre><code>(py_matplotlib) $ cp ~/py_venv/py_matplotlib/lib/python3.8/site-packages/matplotlib/mpl-data/matplotlibrc ~/Documents</code></pre>
+                        </li>
+                        <li>(3) エディタで matplotlibrcファイルを開き、フォント関連設定箇所を編集する</li>
+                        <li>(3)-1. 下記は 13〜20行目 の抜粋<br/>
+                            編集後ファイルの格納箇所: 実行環境が Linux なので <b>$HOME/.config/matplotlib/matplotlibrc</b> へコピー
+<pre><code>## If you wish to change your default style, copy this file to one of the
+## following locations:
+##     Unix/Linux:
+##         $HOME/.config/matplotlib/matplotlibrc OR
+##         $XDG_CONFIG_HOME/matplotlib/matplotlibrc (if $XDG_CONFIG_HOME is set)
+##     Other platforms:
+##         $HOME/.matplotlib/matplotlibrc
+## and edit that copy.</code></pre>
+                        </li>
+                        <li>(3)-2. 編集箇所は 257〜266
+                            <ul>
+                                <li>#font.family: sans-serif <<- 先頭の"#"を外す</li>
+                                <li>#font.serif: DejaVu Serif, <<- 先頭の"#"を外し、"DejaVu Serif" の前に IPAexMincho を追加</li>
+                                <li>##font.sans-serif: DejaVu Sans, <<- 先頭の"#"を外し、"DejaVu Sans" の前に IPAexGothic を追加</li>
+                            </ul>
+                            <div>【修正前】</div>
+<pre><code>#font.family:  sans-serif
+#font.style:   normal
+#font.variant: normal
+#font.weight:  normal
+#font.stretch: normal
+#font.size:    10.0
+    
+# .cache/matplotlib/fontlist-v330.json
+#font.serif:      DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, ...一部省略...
+#font.sans-serif: DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, ...一部省略...</code></pre>
+                            <div>【修正後】</div>
+<pre><code>font.family:  sans-serif
+#font.style:   normal
+#font.variant: normal
+#font.weight:  normal
+#font.stretch: normal
+#font.size:    10.0
+
+# .cache/matplotlib/fontlist-v330.json
+font.serif: IPAexMincho, DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, ...一部省略...
+font.sans-serif: IPAexGothic, DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, ...一部省略...</code></pre>
+                        </li>
+                        <li>(4) 編集保存後 $HOME/.config/matplotlib にコピーします
+<pre><code>$ mkdir -p ~/.config/matplotlib
+$ cp matplotlibrc ~/.config/matplotlib</code></pre>
+                        </li>
+                        <li>(5) ソースコードの下記箇所をコメントアウトするか削除する
+<pre><code># from matplotlib import rcParams
+# rcParams['font.family'] = 'sans-serif'
+# rcParams['font.sans-serif'] = ['IPAexGothic']</code></pre>
+                        </li>
+                    </ul>
+                    <p class="small">これで再度実行すると 1-1 と同一の画像を含むHTMLが出力されます</p>
+                </div>
+            </div>
+
+            <h5 class="mt-4 v-line-start">2.複数の日本語フォントを設定する</h5>
+            <div class="m-3 mb-5">
+                <div class="m-2">
+                    <figure class="figure">
+                        <figcaption class="figure-caption text-center">
+                            【指定した日付の気象データ (気温、室内湿度、気圧) プロット】
+                        </figcaption>
+                        <img class="figure-img img-fluid" src="01_useCjkFont/images/plotweather_02_multiFont_edit.png" />
+                    </figure>
+                </div>
+                <div class="mb-2">2-1. タイトル、ラベル、軸ラベルに任意のフォントを割り当てる</div>
+                <p>【参考URL】</p>
+                <ul class="ms-2 small">
+                    <li>(1) Matplotlib 本家サイト <b>Customizing Matplotlib with style sheets and rcParams</b><br/>
+                        <a href="https://matplotlib.org/stable/tutorials/introductory/customizing.html" target="_blank">
+                            https://matplotlib.org/stable/tutorials/introductory/customizing.html
+                        </a>
+                    </li>
+                    <li>(2) Matplotlib 本家サイト <b>Controlling style of text and labels using a dictionary</b><br/>
+                        <a href="https://matplotlib.org/stable/gallery/text_labels_and_annotations/text_fontdict.html" target="_blank">
+                            https://matplotlib.org/stable/gallery/text_labels_and_annotations/text_fontdict.html
+                        </a>
+                    </li>
+                </ul>
+                <p>[ソース] src/useCjkFont/plotterweather_multifont.py</p>
+                <div class="ms-2">
+                    <div class="font-small-large">(1) インポートとフォント設定 ※plotterweather_singlefont.py と同じインポートを省略</div>
+                    <ul class="font-small-large">
+                        <li><b>[fonts.sans] IPAexGothic</b>: 気温、湿度、気圧のラベルフォント ※日本語フォント</li>
+                        <li><b>[fonts.sans] Noto Sans CJK JP</b>: 気温凡例フォント ※日本語フォント</li>
+                        <li><b>[fonts.sans] FreeSans</b>: 気温の軸ラベルのフォント</li>
+                        <li><b>[fonts.serif] IPAexMincho</b>: タイトルフォント ※日本語フォント</li>
+                    </ul>
+<pre><code class="small python"># 本番環境ではjsonファイルに保存
+PLOT_CONF = {
+    "font.family": "sans-serif",
+    "fonts.sans": ["IPAexGothic","Noto Sans CJK JP","FreeSans"], # 
+    "fonts.serif": ["IPAexMincho"],
+    "label.sizes": [10, 9, 9],
+    "ylim": {
+        "temp": [-20, 40],
+        "pressure": [960, 1030]
+    }
+}
+
+# ...一部省略...
+
+# 軸ラベルのフォントサイズを設定
+label_fontsize, ticklabel_fontsize, ticklable_date_fontsize = PLOT_CONF["label.sizes"]</code></pre>
+                    <div class="small">(2) 描画関数</div>
+                        <ul class="small">
+                            <li>温度サブプロット領域に温度データをプロット
+                                <ul>
+                                    <li>気温のラベルフォント ["IPAexGothic"]
+<pre><code>ylabel_fontdict = {
+    'family': PLOT_CONF["fonts.sans"][0], 'size': label_fontsize+2,
+}
+ax.set_ylabel("気温 (℃)", fontdict=ylabel_fontdict)</code></pre>                                    
+                                    </li>
+                                    <li>温度の軸ラベルのフォント ["FreeSans"]
+<pre><code>tick_fontdict = {
+    'family': PLOT_CONF["fonts.sans"][2], 'size': label_fontsize-1,
+    'weight':'bold'
+}
+ax.set_yticklabels(yticks, fontdict=tick_fontdict)</code></pre>                                    
+                                    </li>
+                                    <li>凡例フォント ["Noto Sans CJK JP"]
+<pre><code>legend_fontdict = {'family': PLOT_CONF["fonts.sans"][1], 'size': label_fontsize-1}
+ax.legend(loc="best", prop=legend_fontdict)</code></pre>                                    
+                                    </li>
+                                    <li>タイトルフォント ["IPAexMincho"]
+<pre><code>title_fontdict = {
+    'family': PLOT_CONF["fonts.serif"][0], 'size': label_fontsize+3,
+}
+ax.set_title("気象データ：{}".format(titleDate), fontdict=title_fontdict)</code></pre>                                    
+                                    </li>
+                                </ul>
+<pre><code class="python">def _axesTemperatureSetting(ax, df, titleDate):
+    """
+    温度サブプロット(axes)にタイトル、軸・軸ラベルを設定し、
+    DataFrameオプジェクトの外気温・室内気温データをプロットする
+    :param ax:温度サブプロット(axes)
+    :param df:DataFrameオプジェクト
+    :param titleDate: タイトル日付文字列
+    """
+    ax.plot(df[WEATHER_IDX_COLUMN], df["temp_out"], color="blue", marker="", label="外気温")
+    ax.plot(df[WEATHER_IDX_COLUMN], df["temp_in"], color="red", marker="", label="室内気温")
+    # タイトル、ラベル、軸ラベルに任意のフォントを割り当てる
+    # 気温のラベルフォント "IPAexGothic"
+    ylabel_fontdict = {
+        'family': PLOT_CONF["fonts.sans"][0], 'size': label_fontsize+2,
+    }
+    ax.set_ylabel("気温 (℃)", fontdict=ylabel_fontdict)
+    # 温度の軸ラベルのフォント "FreeSans"
+    #  軸の範囲 PLOT_CONF[temp]=[-20, 40] で 10℃間隔, 40を含めるため +10
+    tick_fontdict = {
+        'family': PLOT_CONF["fonts.sans"][2], 'size': label_fontsize-1,
+        'weight':'bold'
+    }
+    yticks = [*range(PLOT_CONF["ylim"]["temp"][0], PLOT_CONF["ylim"]["temp"][1] + 10, 10)]
+    # 軸本体
+    ax.set_yticks(yticks)
+    # 軸ラベル
+    ax.set_yticklabels(yticks, fontdict=tick_fontdict)
+    # 凡例フォント "Noto Sans CJK JP"
+    legend_fontdict = {'family': PLOT_CONF["fonts.sans"][1], 'size': label_fontsize-1}
+    ax.legend(loc="best", prop=legend_fontdict)
+    # タイトルフォント "IPAexMincho"
+    title_fontdict = {
+        'family': PLOT_CONF["fonts.serif"][0], 'size': label_fontsize+3,
+    }
+    ax.set_title("気象データ：{}".format(titleDate), fontdict=title_fontdict)
+    # Hide xlabel
+    ax.label_outer()
+    ax.grid(GRID_STYLES)</code></pre>                                
+                            </li>
+                            <li>室内湿度サブプロット領域に湿度データをプロット
+                                <ul>
+                                    <li>湿度のラベルフォント ["IPAexGothic"]
+<pre><code>ylabel_fontdict = {
+    'family': PLOT_CONF["fonts.sans"][0], 'size': label_fontsize+2,
+}
+ax.set_ylabel("室内湿度 (％)", fontdict=ylabel_fontdict)</code></pre>                                    
+                                    </li>
+                                </ul>
+<pre><code class="python">def _axesHumidSetting(ax, df):
+    """
+    湿度サブプロット(axes)に軸・軸ラベルを設定し、DataFrameオプジェクトの室内湿度データをプロットする
+    :param ax:湿度サブプロット(axes)
+    :param df:DataFrameオプジェクト
+    """
+    ax.plot(df[WEATHER_IDX_COLUMN], df["humid"], color="green", marker="")
+    ax.set_ylim([0, 100])
+    # 湿度のラベルフォント "IPAexGothic"
+    ylabel_fontdict = {
+        'family': PLOT_CONF["fonts.sans"][0], 'size': label_fontsize+2,
+    }
+    ax.set_ylabel("室内湿度 (％)", fontdict=ylabel_fontdict)
+    # Hide xlabel
+    ax.label_outer()
+    ax.grid(GRID_STYLES)</code></pre>                            
+                            </li>
+                            <li>気圧サブプロット領域に気圧データをプロット
+                                <ul>
+                                    <li>気圧のラベルフォント ["FreeSans"] <b>※ラベルが非漢字</b>
+<pre><code>ylabel_fontdict = {
+    'family': PLOT_CONF["fonts.sans"][2], 'size': label_fontsize+1,
+}
+ax.set_ylabel("hPa", fontdict=ylabel_fontdict)</code></pre>                                    
+                                    </li>
+                                </ul>
+<pre><code class="python">def _axesPressureSetting(ax, df):
+    """
+    気圧サブプロット(axes)に軸・軸ラベルを設定し、DataFrameオプジェクトの気圧データをプロットする
+    :param ax:湿度サブプロット(axes)
+    :param df:DataFrameオプジェクト
+    """
+    ax.plot(df[WEATHER_IDX_COLUMN], df["pressure"], color="fuchsia", marker="")
+    # 軸ラベルは時間 (00,03,06,09,12,15,18,21,翌日の00)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H"))
+    ax.set_ylim(PLOT_CONF["ylim"]["pressure"])
+    # 気圧のラベルフォント "FreeSans" ※ラベルが非漢字
+    ylabel_fontdict = {
+        'family': PLOT_CONF["fonts.sans"][2], 'size': label_fontsize+1,
+    }
+    ax.set_ylabel("hPa", fontdict=ylabel_fontdict)
+    ax.grid(GRID_STYLES)</code></pre>                            
+                            </li>
+                        </ul>    
+            </div>
+
+            <div class="row mb-5">
+                <dl class="ms-3">
+                    <dd class="indent mt-2">
+                        <a href="https://github.com/pipito-yukio/matplotlib_knowhow/tree/main/src/useCjkFont" target="_blank">
+                            https://github.com/pipito-yukio/matplotlib_knowhow/tree/main/src/useCjkFont
+                        </a>
+                    </dd>    
+                </dl>
+            </div>
+        </div>
+        <script src="assets/highlight/js/highlight.min.js"></script>
+        <script src="assets/highlight/js/java.min.js"></script>
+        <script src="assets/highlight/js/cpp.min.js"></script>
+        <script>
+            hljs.highlightAll();
+        </script>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,109 @@
+.card-img-top,
+.card-img-bottom {
+    height: 300px;
+    /*
+    reference: https: //developer.mozilla.org/ja/docs/Web/CSS/object-fit
+    CSS の object-fit プロパティは、置換要素、例えば <img>や <video>などの中身を、
+    コンテナーにどのようにはめ込むかを設定します。
+    values: [fill | contain | cover | none | scale-down]
+    */
+    object-fit: contain;
+    /*  */
+    margin: 5px;
+    padding: 5px;
+    /* background-color: cornsilk;*/
+}
+
+
+.card-body .card-text-small {
+    font-size: 0.9em;
+    padding: 2px;
+    background-color: lightgray;
+}
+
+.update-date {
+    font-size: 0.85em;
+    text-align: end;
+    text-decoration: underline;
+    margin-bottom: 0.5em;
+}
+
+p.child-indent,
+div.child-indent {
+    font-size: 0.90em;
+    text-indent: 1.5em;
+    width: 100%;
+}
+
+p.indent,
+div.indent {
+    font-size: 0.95em;
+    text-indent: 1em;
+    width: 100%;
+}
+
+p.half-indent,
+div.half-indent {
+    font-size: 0.95em;
+    text-indent: 0.5em;
+}
+
+/* small==0.875em */
+.font-small {
+    font-size: 0.9em;
+}
+
+.font-small-large {
+    font-size: 0.95em;
+}
+
+pre.bg-colored {
+    background-color: antiquewhite;
+}
+
+.v-line-start {
+    border-left: thick solid deepskyblue;
+    padding-left: 10px;
+}
+
+ul.marker-square>li {
+    list-style-type: square;
+}
+
+dl > dt.indent {
+    margin-left: 0.5rem; 
+}
+
+dl > dd.indent {
+    margin-left: 1.0rem;     
+}
+
+dl > dd.indent-double {
+    margin-left: 2.0rem;     
+}
+
+fs-small-md, .fs-small-medium {
+    font-size: 0.85em;
+}
+
+fs-small-sm, .fs-small-small {
+    font-size: 0.75em;
+}
+
+.text-red {
+    color: red;    
+}
+
+.text-blue {
+    color: blue;    
+}
+
+.text-red-bold {
+    color: red;
+    font-weight:bold;
+}
+
+.text-blue-bold {
+    color: blue;
+    font-weight:bold;
+}
