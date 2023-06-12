@@ -89,7 +89,7 @@ src/useCjkFont/
 >コードの説明は下記コンテンツ(Github Pages)をご覧ください  
 https://pipito-yukio.github.io/matplotlib_knowhow/01_useCjkFont.html  
 
-### 4. 健康管理アプリ
+## 4. 健康管理アプリ登録データの可視化
 
 ```
 src/healthcare/
@@ -118,13 +118,24 @@ src/healthcare/
     └── file_util.py
 ```
 
-PlotBloodPressBar_2_xxxxx_month.py
+### 4-1. 睡眠管理データの可視化
+
+Androidアプリの睡眠管理データ入力と可視化画像
+
+【スクリプト名】PlotSleepManBar2Plot_3_xxxxx_month.py
+
+<div>
+<img src="images/SleepManVisualizeForAndroidApp.png" width="600">
+</div>
+<br/>
+
+### 4-2. 血圧測定データの可視化
+
+Androidアプリの血圧測定(午前・午後)データ入力と可視化画像
+
+【スクリプト名】 PlotBloodPressBar_2_xxxxx_month.py
+
 <div>
 <img src="images/BloodPressVisualizeForAndroidApp.png" width="600">
 </div>
 <br/>
-
-PlotSleepManBar2Plot_3_xxxxx_month.py
-<div>
-<img src="images/SleepManVisualizeForAndroidApp.png" width="600">
-</div>
