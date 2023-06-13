@@ -329,7 +329,8 @@ def drawScoreWithMarker(axes: matplotlib.pyplot.Axes, scoreSer: Series) -> None:
             scatter_style: Dict = SCATTER_SCORE_NORMAL_STYLE
         # マーカープロット
         axes.scatter(x_idx, score, **scatter_style)
-        axes.text(x_idx, score + 1, str(score), **PLOT_TEXT_STYLE)
+        # 睡眠スコアは整数 ※Seriesでは浮動小数点で格納されているため整数に整形
+        axes.text(x_idx, score + 1, f"{score:.0f}", **PLOT_TEXT_STYLE)
 
 
 def drawRectBackground(axes: matplotlib.pyplot.Axes,
