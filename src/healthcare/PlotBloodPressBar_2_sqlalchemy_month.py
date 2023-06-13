@@ -24,6 +24,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import text
 
+import util.date_util as du
 from util.file_util import gen_imgname
 
 """
@@ -449,6 +450,11 @@ if __name__ == '__main__':
     year_month: str = args.year_month
     # 選択クエリーのパラメータ: 指定年月の開始日
     start_date: str = f"{year_month}-01"
+    # 日付文字列チェック
+    if not du.check_str_date(start_date):
+        app_logger.warning("Invalid day format!")
+        exit(1)
+
     # 指定年月の月末日
     endDay: int = calcEndOfMonth(year_month)
     # 選択クエリーのパラメータ: 指定年月の終了日
@@ -476,6 +482,11 @@ if __name__ == '__main__':
     recordsWithDict: Dict[str, BloodPressure] = getRecordsWithDict(
         Cls_sess_healthcare, mail_address, start_date, end_date
     )
+    # Check record count
+    app_logger.info(recordsWithDict.keys())
+    if len(recordsWithDict.keys()) == 0:
+        app_logger.warning(f"{mail_address}, {year_month}: Record is empty!")
+        exit(0)
 
     # 月間のプロット用項目別(X軸ラベル, 最高血圧, 最低血圧, 脈拍)リスト生成
     xTicksLabels, pressMaxList, pressMinList, pulseRateList = makeColListForPlotting(

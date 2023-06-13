@@ -15,6 +15,7 @@ from matplotlib.patches import Rectangle
 import pandas as pd
 from pandas.core.frame import DataFrame, Series
 
+import util.date_util as du
 from util.file_util import gen_imgname
 
 """
@@ -386,6 +387,11 @@ if __name__ == '__main__':
     year_month: str = args.year_month
     # 指定年月の開始日
     start_date: str = f"{year_month}-01"
+    # 日付文字列チェック
+    if not du.check_str_date(start_date):
+        app_logger.warning("Invalid day format!")
+        exit(1)
+
     # 指定年月の月末日
     endDay: int = calcEndOfMonth(year_month)
     # 指定年月の終了日
@@ -490,7 +496,7 @@ if __name__ == '__main__':
     daySer: Series = df_sleepMan.index
     # 起床時間の欠損値(測定日なし) NANをプランクを設定
     # https://sparkbyexamples.com/pandas/pandas-replace-nan-with-blank-empty-string/
-    #  Pandas Replace NaN with Blank/Empty String
+    #  Pandas Replace NaN to empty string
     wakeupSer: Series = df_sleepMan['wakeup_time'].fillna("")
     deepSleepingSer: Series = df_sleepMan['deep_sleeping_time']
     # 睡眠時間描画用の差分 ※積み上げ棒グラフの深い睡眠の上にスタック描画
