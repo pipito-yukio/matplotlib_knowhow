@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="assets/css/bootstrap_custom.css" />
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="assets/highlight/styles/default.min.css" />
+        <title>Pandasで複数のCSVデータをロードしマージ(結合)する</title>
+        <meta name="description" content="Merge multiple CSV data and visualize with Matplotlib and Pandas.">
+    </head>
+
+    <body>
+        <div class="container" style="max-width: 980px">
+            <h4 class="m-2 text-center">pandasライブラリでで複数のCSVデータをロードしマージする</h4>
+            <hr />
+            <div class="update-date">【最終更新日】2023-06-13</div>
+            <p class="indent">
+                pandasライブラリで複数のCSVデータをマージし、指定された形式でMatplotlib描画用のDataFrameに加工する方法について解説します。
+            </p>
+            <div class="m-2 text-center">
+                <figure class="figure">
+                    <figcaption class="figure-caption text-center">
+                        【欠損データを含む月間データをプロットした画像】
+                    </figcaption>
+                    <img class="figure-img img-fluid" src="11_plotSleepManBar/SleepManPlot_withMissing.png" width="400"/>
+                </figure>
+            </div>
+            <!-- refercence urls -->
+            <div class="m-2 mb-4">
+                <div>【参考URL】</div>
+                <ul class="ms-2 small">
+                    <li>(1) Pandas本家サイト <b>API リファレンス</b><br/>
+    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.join.html" target="_blank">
+        https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.join.html</a>
+                    </li>
+                    <li>(2) Pandas Join Explained With Examples<br/>
+    <a href="https://sparkbyexamples.com/pandas/pandas-join-explained-with-examples/" target="_blank">
+        https://sparkbyexamples.com/pandas/pandas-join-explained-with-examples/</a>
+                    </li>
+                </ul>
+                <div>【参考にした書籍】</div>
+                <div class="m-2">
+                    <figure class="ms-3">
+                        <blockquote class="small" cite="urn:isbn:978-4-295-00565-0">
+                            第１章 DataFrameの基礎<br>
+                            第３章 pandasのデータ構造 【2.6 データのエクスポートとインポート】<br>
+                            第４章 データを組み立てる 【4.4 複数のデータセットをマージする】<br>
+                            第９章 applayによる関数の適用<br>
+                            第11章 日付/時刻データの操作 【11.9 日付によるデータの絞り込み】<br>
+                        </blockquote>
+                        <figcaption class="blockquote-footer">
+                            ➀ <cite>Pythonデータ分析／機械学習のための基本コーディング！ <b>pandas ライブラリ活用入門</b> 【株式会社インプレス】</cite>
+                        </figcaption>
+                    </figure>
+                    <figure class="ms-3">
+                        <blockquote class="small" cite="urn:isbn:978-4-7981-5591-3">
+                            Chapter1 Numpyの基礎<br>
+                            Chapter2 Numpy配列を操作する関数を知る: 2.5 最大値、最小値を抜き出す
+                        </blockquote>
+                        <figcaption class="blockquote-footer">
+                            ➁ <cite>現場て使える <b>Numpy データ処理入門</b>　機械学習・データサイエンスで役立つ高速処理手法【株式会社翔泳社】</cite>
+                        </figcaption>
+                    </figure>
+                </div>
+                <div>【当サイトの関連リポジトリ】<span class="small">Personal Healthcare applications</span></div>
+                <div class="ms-3 mt-2">
+                    <dl class="small">
+                        <dt>健康管理(Android)アプリ登録画面とWebアプリのIF設計の詳細ついては下記をご覧ください</dt>
+                        <dd class="ms-3">
+                            <a href="https://pipito-yukio.github.io/personal_healthcare/01_design_interface.html" target="_blank">
+                                https://pipito-yukio.github.io/personal_healthcare/01_design_interface.html
+                            </a>
+                        </dd>
+                    </dl>
+                    <figure class="figure">
+                        <figcaption class="figure-caption text-center">
+                            【AndroidアプリとWebアプリのIF設計の概要】
+                        </figcaption>
+                        <img class="figure-img img-fluid" src="images/HealthcareJ_1_registJSON.png" width="850" />
+                    </figure>
+                </div>
+            </div>
+
+            <h5 class="v-line-start">1. 睡眠管理CSVデータと夜間頻尿要因CSVデータのマージ</h5>
+            <div class="m-3">
+                <div class="mb-2">(1) CSVデータ ※月間データ</div>
+                <ul class="small">
+                    <li>ユーザCSV (person.csv) ※今回は使いません
+<pre><code class="csv">id,email,name
+1,user1@examples.com,テスト　一郎</code></pre>
+                    </li>
+                    <li>睡眠管理データCSV (sleep_management_202303.csv) の抜粋 ※欠損データ (測定データなし) 含む
+<pre><code class="csv">pid,measurement_day,wakeup_time,sleep_score,sleeping_time,deep_sleeping_time
+1,2023-03-01,05:30:00,83,06:00:00,00:50:00
+1,2023-03-02,05:30:00,79,06:40:00,00:50:00
+1,2023-03-03,05:30:00,93,07:50:00,01:20:00
+#...省略...
+1,2023-03-21,05:15:00,,05:40:00,
+1,2023-03-22,05:30:00,71,05:30:00,00:40:00
+#...省略...
+1,2023-03-30,05:10:00,90,06:20:00,01:10:00
+1,2023-03-31,04:50:00,82,06:00:00,00:40:00</code></pre>
+                    </li>
+                    <li>夜間頻尿要因データCSV (nocturia_factors_202303.csv) の抜粋 ※欠損データ (測定データなし) 含む
+<pre><code class="csv">pid,measurement_day,midnight_toilet_visits,has_coffee,has_tea,has_alcohol,has_nutrition_drink,has_sports_drink,has_diuretic,take_medicine,take_bathing,condition_memo
+1,2023-03-01,0,t,f,f,f,f,f,f,f,ちょっと風邪気味
+1,2023-03-02,3,f,f,f,t,f,f,f,f,
+1,2023-03-03,1,t,f,f,f,f,f,f,f,
+#...省略...
+1,2023-03-21,2,t,f,f,f,f,f,f,t,
+1,2023-03-22,2,f,f,f,t,f,f,f,f,
+#...省略...
+1,2023-03-30,5,f,f,f,t,f,f,f,f,相当つかれていたのでユンケルを飲んだ
+1,2023-03-31,1,t,f,f,f,f,f,f,t,</code></pre>
+                    </li>
+                </ul>
+                <div class="mb-2">(2) CSVデータに対応するテーブル定義</div>
+                <ul class="small">
+                    <li>ユーザーテーブル
+<pre><code class="sql">CREATE TABLE bodyhealth.person(
+   id smallint NOT NULL,
+   email varchar(50) NOT NULL,
+   name varchar(24) NOT NULL,
+   CONSTRAINT pk_person PRIMARY KEY (id)
+);</code></pre>
+                    </li>
+                    <li>睡眠管理テーブル
+<pre><code class="sql">CREATE TABLE bodyhealth.sleep_management(
+  pid smallint NOT NULL,
+  measurement_day date NOT NULL,
+  wakeup_time time without time zone NOT NULL,
+  sleep_score smallint,
+  sleeping_time time without time zone NOT NULL,
+  deep_sleeping_time time without time zone
+);</code></pre>
+                    </li>
+                    <li>夜中トイレ回数要因テーブル
+<pre><code class="sql">CREATE TABLE bodyhealth.nocturia_factors(
+  pid smallint NOT NULL,
+  measurement_day date NOT NULL,
+  midnight_toilet_visits smallint NOT NULL,
+  has_coffee boolean,
+  has_tea boolean,
+  has_alcohol boolean,
+  has_nutrition_drink boolean,
+  has_sports_drink boolean,
+  has_diuretic boolean,
+  take_medicine boolean,
+  take_bathing boolean,
+  condition_memo varchar(255)
+);  </code></pre>
+                    </li>
+                </ul>    
+                <div class="mb-2">(3) DataFrameのjoin (※但しpidは無視) と同等のＳＱＬ</div>
+                <div class="ms-3 mt-1">
+<pre><code class="sql">SELECT
+  to_char(sm.measurement_day,'YYYY-MM-DD') as measurement_day
+  ,to_char(wakeup_time,'HH24:MI') as wakeup_time
+  ,sleep_score
+  ,to_char(sleeping_time, 'HH24:MI') as sleeping_time
+  ,to_char(deep_sleeping_time, 'HH24:MI') as deep_sleeping_time
+  ,midnight_toilet_visits
+FROM
+  bodyhealth.person p
+  INNER JOIN bodyhealth.sleep_management sm ON p.id = sm.pid
+  INNER JOIN bodyhealth.nocturia_factors nf ON p.id = nf.pid
+WHERE
+  email=:emailAddress
+  AND
+  sm.measurement_day BETWEEN :startDay AND :endDay
+  AND
+  sm.measurement_day = nf.measurement_day
+  ORDER BY sm.measurement_day</code></pre>        
+                </div>            
+
+                <div class="mb-2">(4) pandasで利用する関数</div>
+                <ul class="small">
+                    <li>年月(文字列)の末日を計算 ※指定された年月の日数 (例) 2023-03 なら 31
+<pre><code class="python">def calcEndOfMonth(str_year_month: str) -&gt; int:
+    """
+    年月(文字列)の末日を計算する
+    :param str_year_month: 年月(文字列, "-"区切り)
+    :return: 末日
+    """
+    yearMonths = str_year_month.split("-")
+    valYear, valMonth = int(yearMonths[0]), int(yearMonths[1])
+    if valMonth == 12:
+        valYear += 1
+        valMonth = 1
+    else:
+        valMonth += 1
+    # 月末日の翌月の1日
+    valNextYearMonth = date(valYear, valMonth, 1)
+    # 月末日の計算: 次の月-1日
+    valLastDayOfMonth = valNextYearMonth - timedelta(days=1)
+    return valLastDayOfMonth.day</code></pre>
+                    </li>
+                    <li>時刻文字列("時:分")を分に変換 ※列データの加工: 棒グラフの高さは分が単位
+<pre><code class="python">def toMinute(strTime: str) -&gt; Optional[int]:
+    """
+    時刻文字列("時:分")を分に変換する
+    :param strTime: 時刻文字列("時:分") ※欠損値有り(None)
+    :return: 分(整数), NoneならNone
+    """
+    if strTime is None or pd.isna(strTime):  # pandasでは nan のチェックが必要
+        return None
+
+    times: List[str] = strTime.split(":")
+    return int(times[0]) * 60 + int(times[1])</code></pre>
+                    </li>
+                    <li>時刻文字列("%H:%M:%S")から秒部分を切り捨て ※列データの加工
+<pre><code class="python">def trimSecondsWithTime(strTime: str) -&gt; str:
+    """
+    時刻文字列("%H:%M:%S")から秒部分をトリムする
+    :param strTime: 時刻文字列("%H:%M:%S") ※欠損値(None)有り
+    :return: 秒をトリムした時刻文字列
+    """
+    if strTime is None or pd.isna(strTime):  # pandasでは nan のチェックが必要
+        return ""
+
+    timeValues: List[str] = strTime.split(":")
+    return f"{timeValues[0]}:{timeValues[1]}"</code></pre>
+                    </li>
+                    <li>分を時刻文字列("%H:%M")に変換 ※列データの加工
+<pre><code class="python">def minuteToFormatTime(val_minutes: int) -&gt; str:
+    """
+    分を時刻文字列("%H:%M")に変換する
+    :param val_minutes: 分
+    :return: 時刻文字列("%H:%M")
+    """
+    return f"{val_minutes // 60:#02d}:{val_minutes % 60:#02d}"</code></pre>
+                    </li>
+                </ul>
+
+                <div class="mb-2">(5) スクリプトメイン</div>
+                <ul class="small">
+                    <li>1-1. インポート ※pandas関連処理のみ
+<pre><code class="python">import argparse
+import os
+from datetime import date, datetime, timedelta
+import pandas as pd
+from pandas.core.frame import DataFrame, Series
+# ...一部省略...
+import util.date_util as du
+
+</code></pre>
+                    </li>
+                    <li>1-2. 定数定義 ※pandas関連処理のみ
+<pre><code class="python"># ISO8601フォーマット
+FMT_DATE: str = '%Y-%m-%d'
+# datetime変換フォーマット ※psqlでのCSVエクスポートが秒まで出力
+FMT_DATETIME: str = '%Y-%m-%d %H:%M:%S'
+# ...一部省略...
+# 睡眠管理データ(CSVファイル)で利用するカラム ※"pid"を除く
+SLEEP_MAN_COLS: List[str] = [
+    "measurement_day", "wakeup_time", "sleep_score", "sleeping_time", "deep_sleeping_time"
+]
+
+# 夜間頻尿要因データ(CSVファイル)で利用するカラム ※"measurement_day"と"midnight_toilet_visits"
+NOCT_FACT_COLS: List[str] = ["measurement_day", "midnight_toilet_visits"]</code></pre>
+                    </li>
+                    <li>2. コマンドラインオプション ※すべて必須
+                        <ul>
+                            <li>プロット対象年月【 月間データ】: (例) -year-month 2023-03</li>
+                            <li>睡眠管理CSVデータファイルパス: (例) --sleep-man datas/csv/sleep_management_202303.csv</li>
+                            <li>夜間頻尿要因CSVデータファイルパス: (例) --noct-fact datas/csv/nocturia_factors_202303.csv</li>
+                        </ul>
+<pre><code class="python">if __name__ == '__main__':
+    parser: argparse.ArgumentParser = argparse.ArgumentParser()
+    # プロット対象年月
+    parser.add_argument("--year-month", type=str, required=True,
+                        help="年月 (例) 2023-04")
+    # 睡眠管理CSVデータファイルパス: 年月のみか、複数月
+    parser.add_argument("--sleep-man", type=str, required=True,
+                        help="datas/csv/sleep_management.csv")
+    # 夜間頻尿要因CSVデータファイルパス: 年月のみか、複数月 ※件数は一致すること
+    parser.add_argument("--noct-fact", type=str, required=True,
+                        help="datas/csv/nocturia_factors.csv")
+    args: argparse.Namespace = parser.parse_args()</code></pre>
+                    </li>
+                    <li>3. CSVファイルの存在チェック
+<pre><code class="python">    path_sleepMan: str = os.path.expanduser(args.sleep_man)
+    path_noctFact: str = os.path.expanduser(args.noct_fact)
+    # スクリプト直下の相対ファイルか、ユーザホームのCSV格納ディレクトリのファイル
+    if not os.path.exists(path_sleepMan) or not os.path.exists(path_noctFact):
+        app_logger.warning("CSV not found.")
+        exit(1)</code></pre>
+                    </li>
+                    <li>4. プロット処理年月の開始日と終了日(月末日)の計算
+<pre><code class="python">    year_month: str = args.year_month
+    # 指定年月の開始日
+    start_date: str = f"{year_month}-01"
+    # 日付文字列チェック
+    if not du.check_str_date(start_date):
+        app_logger.warning("Invalid day format!")
+        exit(1)
+
+    # 指定年月の月末日
+    endDay: int = calcEndOfMonth(year_month)
+    # 指定年月の終了日
+    end_date: str = f"{year_month}-{endDay:#02d}"</code></pre>
+                    </li>
+                    <li>5-1. 各CSVファイルごとに対応するDataFrameを生成する
+<pre><code class="python">    # 睡眠管理用DataFrame
+    df_sleepMan: DataFrame = pd.read_csv(
+        path_sleepMan, header=0,
+        parse_dates=['measurement_day'], date_format=FMT_DATE,
+        usecols=SLEEP_MAN_COLS
+    )
+    # 夜間頻尿要因用DataFrame
+    df_noctFact: DataFrame = pd.read_csv(
+        path_noctFact, header=0,
+        parse_dates=['measurement_day'], date_format=FMT_DATE,
+        usecols=NOCT_FACT_COLS
+    )</code></pre>
+                    </li>
+                    <li>5-2. それぞれのDataFrameをインデックス (【測定日付】'measurement_day') で結合する
+<pre><code class="python">    # INNER JOIN (1:1)
+    df_sleepMan = df_sleepMan.set_index('measurement_day').join(
+        df_noctFact.set_index('measurement_day')
+    )</code></pre>
+                    </li>
+                    <li>6-1. 就寝時刻の計算: (測定日[必須]+起床時間[必須]) - 睡眠時間[任意]
+<pre><code class="python">    days: Series = df_sleepMan.index
+    bedTimes: List[Optional[datetime]] = [
+        calcBedTime(
+            day.strftime(FMT_DATE), wakeup, sleeping) for day, wakeup, sleeping in zip(
+            days, df_sleepMan['wakeup_time'], df_sleepMan['sleeping_time']
+        )
+    ])</code></pre>
+                    </li>
+                    <li>6-2. <b>Series.apply</b>関数を使って列データを加工する
+                        <ul>
+                            <li>起床時刻("%H:%M:%S")の秒部分をトリムする (【関数】<b>trimSecondsWithTime</b>) ※上段領域のX軸ラベル用に整形</li>
+                            <li>睡眠時間("%H:%M:%S")を分(整数)に変換 (【関数】<b>toMinute</b>)</li>
+                            <li>深い睡眠("%H:%M:%S")を分(整数)に変換 (【関数】<b>toMinute</b>)</li>
+                        </ul>
+
+<pre><code class="python">    # 起床時刻("%H:%M:%S"): 秒部分をトリムする ※健康管理Androidアプリで入力した値が"%H:%M"
+    df_sleepMan['wakeup_time'] = df_sleepMan['wakeup_time'].apply(trimSecondsWithTime)
+    # 睡眠時間("%H:%M:%S"): 分(整数)に変換
+    df_sleepMan['sleeping_time'] = df_sleepMan['sleeping_time'].apply(toMinute)
+    # 深い睡眠("%H:%M:%S"): 分(整数)に変換
+    df_sleepMan['deep_sleeping_time'] = df_sleepMan['deep_sleeping_time'].apply(toMinute)</code></pre>
+                    </li>
+                    <li>6.3 就寝時間はX軸出力用に時刻部分のみ設定する
+<pre><code class="python">df_sleepMan['bed_time'] = [bedTm.strftime("%H:%M") for bedTm in bedTimes]</code></pre>
+                    </li>
+                    <li>6.4 当該年月の期間に欠損データ (測定日未登録) があればインデックスを振り直す
+                        <ul>
+                            <li>【単月データの場合】 データ件数 ＜ 当該年月の日数</li>
+                            <li>【複数月に跨るデータの場合】 (インデックスの開始日〜終了日までの件数) ＜ 当該年月の日数</li>
+                        </ul>
+<pre><code class="python">    org_dataSize: int = df_sleepMan.index.shape[0]
+    if org_dataSize < endDay:
+        # 単月データで欠損値有り (測定日未登録)
+        # https://pandas.pydata.org/docs/reference/api/pandas.date_range.html
+        df_sleepMan = df_sleepMan.reindex(
+            pd.date_range(start=start_date, end=end_date, name='measurement_day')
+        )
+    else:
+        # 複数月にまたがるCSV
+        # 月間データを取り出す
+        df_sleepMan = df_sleepMan.loc[start_date:end_date]
+        filtered_dataSize: int = df_sleepMan.shape[0]
+        # 月間データに欠損データが有る場合は埋める
+        if filtered_dataSize < endDay:
+            df_sleepMan = df_sleepMan.reindex(
+                pd.date_range(start=start_date, end=end_date, name='measurement_day')
+            )</code></pre>
+                    </li>
+                </ul>
+            </div>    
+
+            <div class="row mb-5 small">
+                <dl class="ms-3">
+                    <dt class="indent">リポジトリに戻る<dt>
+                    <dd class="indent mt-2">
+                        <a href="https://github.com/pipito-yukio/matplotlib_knowhow">https://github.com/pipito-yukio/matplotlib_knowhow</a>
+                    </dd>    
+                    <dt class="indent mt-3">ソースコードはこちら<dt>
+                    <dd class="indent mt-2">
+                        <a href="https://github.com/pipito-yukio/matplotlib_knowhow/tree/main/src/healthcare">
+                            https://github.com/pipito-yukio/matplotlib_knowhow/tree/main/src/healthcare
+                        </a>
+                    </dd>    
+                </dl>
+            </div>
+        </div>
+        <script src="assets/highlight/js/highlight.min.js"></script>
+        <script src="assets/highlight/js/java.min.js"></script>
+        <script src="assets/highlight/js/cpp.min.js"></script>
+        <script>
+            hljs.highlightAll();
+        </script>
+        </div>
+    </body>
+</html>
