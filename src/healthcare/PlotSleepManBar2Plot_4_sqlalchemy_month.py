@@ -607,6 +607,14 @@ if __name__ == '__main__':
     np_sleepingDiffMinutes = np_sleepingMinutes - np_deepSleepingMinutes
     app_logger.info(np_sleepingDiffMinutes)
 
+    # プロット用ラベルデータを作成する
+    # X軸: データ件数(月間: 1〜末日までの日数)
+    dateRangeSize: int = len(plotDateRanges)
+    xIndexes = np.arange(dateRangeSize)
+    # Y軸 (0〜12時間) ["00:00","00:30","01:00", ..., "11:30","12:00"]
+    sleepingTimeYTicks: List = [minuteToFormatTime(x) for x in
+                                range(0, SLEEP_TIME_MAX + 1, 30)]
+
     # グラフ出力
     # 携帯用の描画領域サイズ(ピクセル)をインチに変換
     fig_width_inch, fig_height_inch = pixelToInch(
@@ -635,12 +643,6 @@ if __name__ == '__main__':
     ax_top.grid(**AXES_GRID_STYLE)
 
     # 下段メインプロット領域
-    # X軸: データ件数(月間: 1〜末日までの日数)
-    dateRangeSize: int = len(plotDateRanges)
-    xIndexes = np.arange(dateRangeSize)
-    # Y軸 (0〜12時間) ["00:00","00:30","01:00", ..., "11:30","12:00"]
-    sleepingTimeYTicks: List = [minuteToFormatTime(x) for x in
-                                range(0, SLEEP_TIME_MAX + 1, 30)]
     # 深い睡眠: 棒グラフ
     ax_main.bar(xIndexes, np_deepSleepingMinutes, BAR_WIDTH,
                 color=COLOR_BAR_DEEP_SLEEPING,
