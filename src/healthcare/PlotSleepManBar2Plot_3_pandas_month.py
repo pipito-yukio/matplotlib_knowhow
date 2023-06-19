@@ -473,16 +473,17 @@ if __name__ == '__main__':
     # https://sparkbyexamples.com/pandas/pandas-replace-nan-with-blank-empty-string/
     #  Pandas Replace NaN to empty string
     wakeupSer: Series = df_sleepMan['wakeup_time'].fillna("")
-    deepSleepingSer: Series = df_sleepMan['deep_sleeping_time']
-    # 睡眠時間描画用の差分 ※積み上げ棒グラフの深い睡眠の上にスタック描画
-    sleepingDiffSer: Series = df_sleepMan['sleeping_time'] - deepSleepingSer
-    app_logger.info(f"sleepingDiff:\n{sleepingDiffSer}")
     # X軸ラベルリスト: "日 (曜日) " + 起床時刻
     xLabels: List[str] = [
         f"{makeDateLabel(day.strftime(FMT_DATE))} {wakeup}" for day, wakeup in zip(
             daySer, wakeupSer
         )
     ]
+    # 深い睡眠データ
+    deepSleepingSer: Series = df_sleepMan['deep_sleeping_time']
+    # 睡眠時間描画用の差分 ※積み上げ棒グラフの深い睡眠の上にスタック描画
+    sleepingDiffSer: Series = df_sleepMan['sleeping_time'] - deepSleepingSer
+    app_logger.info(f"sleepingDiff:\n{sleepingDiffSer}")
     # X軸のインデックス生成 ※月間の日数
     xIndexes = np.arange(dateRangeSize)
     # Y軸 (0〜12時間) ["00:00","00:30","01:00", ..., "11:30","12:00"]
