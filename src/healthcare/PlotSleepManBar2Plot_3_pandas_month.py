@@ -440,9 +440,17 @@ if __name__ == '__main__':
     app_logger.info(df_sleepMan.shape)
     app_logger.info(df_sleepMan)
 
-    # Seriesからプロット用ラベルデータを作成する
-    # X軸: データ件数(月間: 1〜末日までの日数)
+    # 深い睡眠データ
+    deepSleepingSer: Series = df_sleepMan['deep_sleeping_time']
+    # 睡眠時間描画用の差分 ※積み上げ棒グラフの深い睡眠の上にスタック描画
+    sleepingDiffSer: Series = df_sleepMan['sleeping_time'] - deepSleepingSer
+    app_logger.info(f"sleepingDiff:\n{sleepingDiffSer}")
+
+    # データ件数(月間: 1〜末日までの日数)
     dateRangeSize: int = df_sleepMan.shape[0]
+    # X軸のインデックス生成 ※月間の日数
+    xIndexes = np.arange(dateRangeSize)
+    # Seriesからプロット用ラベルデータを作成する
     # メインプロットのX軸ラベル
     daySer: Series = df_sleepMan.index
     # 起床時間の欠損値(測定日なし) NANをプランクを設定
@@ -455,13 +463,6 @@ if __name__ == '__main__':
             daySer, wakeupSer
         )
     ]
-    # 深い睡眠データ
-    deepSleepingSer: Series = df_sleepMan['deep_sleeping_time']
-    # 睡眠時間描画用の差分 ※積み上げ棒グラフの深い睡眠の上にスタック描画
-    sleepingDiffSer: Series = df_sleepMan['sleeping_time'] - deepSleepingSer
-    app_logger.info(f"sleepingDiff:\n{sleepingDiffSer}")
-    # X軸のインデックス生成 ※月間の日数
-    xIndexes = np.arange(dateRangeSize)
     # Y軸 (0〜12時間) ["00:00","00:30","01:00", ..., "11:30","12:00"]
     sleepingTimeYTicks: List = [minuteToFormatTime(x) for x in
                                 range(0, SLEEP_TIME_MAX + 1, 30)]
