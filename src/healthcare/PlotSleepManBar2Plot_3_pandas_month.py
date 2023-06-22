@@ -239,17 +239,6 @@ def makeDateLabel(strIsoDay: str) -> str:
     return f"{val_date.day} ({weekday_name})"
 
 
-def removeTimeHeadZero(str_time: str) -> str:
-    """
-    時間の先頭"0"をトリムする ※棒グラフの上部に表示する時刻
-    :param str_time: 時刻文字列 ("%H:%M")
-    :return: 時間の先頭の"0"をトリムした時刻文字列
-    """
-    if str_time.startswith("0"):
-        return str_time[1:]
-    return str_time
-
-
 def makeTitleWithMonthRange(str_yearMonth: str, val_endDay: int) -> str:
     """
     タイトル用月間日付範囲の生成
@@ -292,19 +281,6 @@ def pixelToInch(width_px: int, height_px: int, density: float) -> Tuple[float, f
     inch_height = height_px * px
     app_logger.info(f"fig_width_inch: {inch_width}, fig_height_inch: {inch_height}")
     return inch_width, inch_height
-
-
-def drawSleepingTime(axes: matplotlib.pyplot.Axes, time_list: List[str]) -> None:
-    """
-    カスタム時刻描画
-    :param axes: 描画領域
-    :param time_list: 睡眠時刻リスト (欠損値有り: None)
-    """
-    for x_idx, str_time in enumerate(time_list):
-        if str_time is not None:
-            minute: int = toMinute(str_time)
-            # Y方向を0.5上に: val+1
-            axes.text(x_idx, minute + 1, str_time, **PLOT_TEXT_STYLE)
 
 
 def drawScoreWithMarker(axes: matplotlib.pyplot.Axes, scoreSer: Series) -> None:
