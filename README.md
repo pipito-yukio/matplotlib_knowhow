@@ -35,6 +35,12 @@ pi@raspi-4:~ $ python3 -V
 Python 3.9.2
 ```
 
+こちらは運用中の気象観測データの可視化画像
+<div>
+<img src="images/WeatherDataViewer.png" width="300">
+</div>
+<br/>
+
 
 ## ソースとpython仮想環境, 使用ライブラリ
 
