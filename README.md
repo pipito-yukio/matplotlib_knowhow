@@ -105,10 +105,8 @@ src/healthcare/
 │       ├─ blood_pressure_202303.csv   # 血圧測定データ ※欠損データ確認用テストデータ
 │       ├─ nocturia_factors.csv        # 夜間頻尿要因データ 2023-01〜2023-04 の4ヶ月分
 │       ├─ nocturia_factors_202303.csv # 夜間頻尿要因データ ※欠損データ確認用テストデータ
-│       ├─ nocturia_factors_org.csv
 │       ├─ sleep_management.csv        # 睡眠管理データ 2023-01〜2023-04 の4ヶ月分
-│       ├─ sleep_management_202303.csv # 睡眠管理データ ※欠損データ確認用テストデータ
-│       └─ sleep_management_org.csv
+│       └─ sleep_management_202303.csv # 睡眠管理データ ※欠損データ確認用テストデータ
 ├── sql
 │   ├── 10_createdb.sql       # 健康管理データベース作成クエリー (PostgreSQL 12)  
 │   └── 11_createtable.sql    # 健康管理テーブル作成クエリー
@@ -120,9 +118,13 @@ src/healthcare/
 
 ### 4-1. 睡眠管理データの可視化
 
-Androidアプリの睡眠管理データ入力と可視化画像
+Androidアプリの睡眠管理データ入力とアプリに提供予定の可視化画像
 
-【スクリプト名】PlotSleepManBar2Plot_3_xxxxx_month.py
+- この可視化画像のコーディングはpandasライブラリでは結構大変です。
+- 可視化だけなら SQLAlchemyを使ったほうが容易ですが、月間データの場合は統計情報も計算したいので Flaskアプリで実装する場合は SQLAlchemy + pandas を組み合わせることになります。
+
+>コードの詳しい説明は下記コンテンツ(Github Pages)をご覧ください  
+https://pipito-yukio.github.io/matplotlib_knowhow/11_plotSleepManBar_1_pandas.html  
 
 <div>
 <img src="images/SleepManVisualizeForAndroidApp.png" width="600">
