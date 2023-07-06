@@ -119,8 +119,8 @@ BAR_LABEL_STYLE: Dict = {'color': 'red', 'fontsize': 8, 'fontweight': 'heavy'}
 # 睡眠時間用(時:分)スタイル: 黒
 PLOT_TEXT_STYLE: Dict = {'fontsize': 8, 'fontweight': 'demibold',
                          'horizontalalignment': 'center', 'verticalalignment': 'bottom'}
-# タイトルフォントスタイル
-TITLE_FONT_DICT: Dict = {'fontsize': 9, 'fontweight': 'medium'}
+# タイトルスタイル
+TITLE_STYLE: Dict = {'fontsize': 10}
 # スキャッターマーカースタイル
 MARKER_SIZE_WITH_MONTH: float = 9.
 # https://matplotlib.org/stable/gallery/shapes_and_collections/scatter.html
@@ -145,7 +145,7 @@ GRID_SPEC_HEIGHT_RATIO: List[int] = [1, 5]
 # 凡例位置 (上端,右側) ※睡眠スコア値が上端にプロットされることはまれのためプロットが隠れることが無い
 LEGEND_LOC: str = 'upper right'
 # タイトルフォーマット
-FMT_MEASUREMENT_RANGE: str = "【表示期間】{}〜{}"
+FMT_MEASUREMENT_RANGE: str = "睡眠管理【期間】{}〜{}"
 # 日本語の曜日
 JP_WEEK_DAY_NAMES: List[str] = ["月", "火", "水", "木", "金", "土", "日"]
 
@@ -348,7 +348,7 @@ def calcEndOfMonth(str_year_month: str) -> int:
     return valLastDayOfMonth.day
 
 
-def calcBedTime(strDate: datetime, strWakeupTime: str, strSleepingTime: str
+def calcBedTime(strDate: str, strWakeupTime: str, strSleepingTime: str
                 ) -> Optional[datetime]:
     """
     就寝時刻(前日)を計算する
@@ -679,7 +679,7 @@ if __name__ == '__main__':
 
     # 上端プロット領域
     # タイトル
-    ax_top.set_title(titleDateRange)
+    ax_top.set_title(titleDateRange, **TITLE_STYLE)
     # 夜間トイレ回数 (散布図)
     ax_top.scatter(xIndexes, np_toiletVisits, **SCATTER_TOILET_VISITS_STYLE)
     ax_top.set_ylim(TOILET_VISITS_MIN, TOILET_VISITS_MAX)
