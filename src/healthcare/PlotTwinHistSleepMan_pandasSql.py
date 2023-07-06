@@ -35,10 +35,10 @@ from util.file_util import gen_imgname
   (A) 睡眠スコア >=80
   (B) 睡眠スコア <75
 [プロット列]
-  (1) 睡眠時刻 (計算項目): 起床時刻(SQLで取得) - 睡眠時間(SQLで取得)
-  (2) 深い睡眠時間 (SQLで取得): 分に変換
-  (3) 睡眠時間 (SQLで取得)
-  (4) 夜間トイレ回数 (SQLで取得)
+  (1) 夜間トイレ回数 (SQLで取得)
+  (2) 睡眠時刻 (計算項目): 起床時刻(SQLで取得) - 睡眠時間(SQLで取得)
+  (3) 深い睡眠時間 (SQLで取得): 分に変換
+  (4) 睡眠時間 (SQLで取得)
 """
 
 # スクリプト名
@@ -104,7 +104,12 @@ FMT_MEASUREMENT_RANGE: str = "睡眠管理【期間】{}〜{}"
 GRID_SPEC_HEIGHT_RATIO: List[int] = [25, 25, 25, 25]
 # Y軸ラベル名 ※全領域共通
 Y_LABEL_HIST: str = '度数 (回)'
-# 1段目: 就寝時刻: (前日) 20:00 〜 (当日) 1:00
+# 1段目: 夜間トイレ回数
+X_LABEL_TOILET_VISITS: str = '夜間トイレ回数'
+TOILET_VISITS_MIN: int = 0
+TOILET_VISITS_MAX: int = 7
+STEP_TOILET_VISITS: int = 1
+# 2段目: 就寝時刻: (前日) 20:00 〜 (当日) 1:00
 X_LABEL_BED_TIME: str = '就寝時刻 (前日)'
 BED_TIME_MIN: int = -240  # 前日 20:00
 BED_TIME_MAX: int = 60  # 当日 01:00
@@ -113,21 +118,16 @@ X_BED_TIME_TICKS: List[str] = [
     '20:00', '20:30', '21:00', '21:30', '22:00', '22:30',
     '23:00', '23:30', '00:00', '00:30', '01:00'
 ]
-# 2段目: 深い睡眠: 0〜120
+# 3段目: 深い睡眠: 0〜120
 X_LABEL_DEEP_SLEEPING: str = '深い睡眠時間 (分)'
 DEEP_SLEEPING_MIN: int = 0
 DEEP_SLEEPING_MAX: int = 120
 STEP_DEEP_SLEEPING: int = 10
-# 3段目: 睡眠時間: 4:00 〜 10:00
+# 4段目: 睡眠時間: 4:00 〜 10:00
 Y_LABEL_SLEEPING: str = '睡眠時間 (時:分)'
 SLEEPING_MIN: int = 240  # 4:00
 SLEEPING_MAX: int = 600  # 10:00
 STEP_SLEEPING: int = 30
-# 4段目: 夜間トイレ回数
-X_LABEL_TOILET_VISITS: str = '夜間トイレ回数'
-TOILET_VISITS_MIN: int = 0
-TOILET_VISITS_MAX: int = 7
-STEP_TOILET_VISITS: int = 1
 
 # 棒グラフの幅比率
 BAR_WIDTH_RATIO: float = 0.8
@@ -594,15 +594,15 @@ if __name__ == '__main__':
         PHONE_PX_WIDTH, PHONE_PX_HEIGHT, PHONE_DENSITY
     )
     fig: Figure
-    # 1段目: 就寝時刻の度数プロット領域
-    ax_bedtime: Axes
-    # 2段目: 深い睡眠の度数プロット領域
-    ax_deep_sleeping: Axes
-    # 3段目: 睡眠時間の度数プロット領域
-    ax_sleeping: Axes
-    # 4段目: 夜間トイレ回数の度数プロット領域
+    # 1段目: 夜間トイレ回数の度数プロット領域
     ax_toilet_visits: Axes
-    fig, (ax_bedtime, ax_deep_sleeping, ax_sleeping, ax_toilet_visits) = plt.subplots(
+    # 2段目: 就寝時刻の度数プロット領域
+    ax_bedtime: Axes
+    # 3段目: 深い睡眠の度数プロット領域
+    ax_deep_sleeping: Axes
+    # 4段目: 睡眠時間の度数プロット領域
+    ax_sleeping: Axes
+    fig, (ax_toilet_visits, ax_bedtime, ax_deep_sleeping, ax_sleeping) = plt.subplots(
         4, 1, gridspec_kw={'height_ratios': GRID_SPEC_HEIGHT_RATIO}, layout='constrained',
         figsize=(fig_width_inch, fig_height_inch)
     )
@@ -610,25 +610,26 @@ if __name__ == '__main__':
     #  with subplots_adjust and/or tight_layout; not calling subplots_adjust.
     # plt.subplots_adjust(hspace=2.0)
     # Y方向のグリッド線のみ表示
-    for axes in [ax_bedtime, ax_deep_sleeping, ax_sleeping, ax_toilet_visits]:
+    for axes in [ax_toilet_visits, ax_bedtime, ax_deep_sleeping, ax_sleeping]:
         axes.grid(**AXES_GRID_STYLE)
 
-    # グラフタイトル (月間範囲)
+    # (1) 夜間起床回数
+    # グラフタイトル (期間)
     titleDateRange: str = makeTitleWithDayRange(start_date, end_date)
-    ax_bedtime.set_title(titleDateRange, **TITLE_STYLE)
+    ax_toilet_visits.set_title(titleDateRange, **TITLE_STYLE)
+    # Axes.barでツイン棒グラフ描画
+    plotToiletVisitsTwinHist(ax_toilet_visits, warn_toilet_visits, good_toilet_visits)
     # カスタム(矩形)のツイン棒グラフ描画
-    # (1) 就寝時刻プロット
+    # (2) 就寝時刻プロット
     plotBedtimeTwinBar(ax_bedtime, warn_bedtime, good_bedtime)
-    # (2) 深い睡眠時間プロット
+    # (3) 深い睡眠時間プロット
     plotDeepSleepingTwinBar(ax_deep_sleeping, warn_deep_sleeping, good_deep_sleeping)
-    # (3) 睡眠時間プロット
+    # (4) 睡眠時間プロット
     plotSleepingTwinBar(ax_sleeping, warn_sleeping, good_sleeping)
-    # 同じ凡例をまとめて設定 (1)-(3)
+    # 同じ凡例をまとめて設定 (2)-(4)
     # https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.legend.html
     for axes in [ax_bedtime, ax_deep_sleeping, ax_sleeping]:
         axes.legend(handles=[WARN_LEGEND, GOOD_LEGEND], **LEGEND_STYLE)
-    # Axes.barでツイン棒グラフ描画
-    plotToiletVisitsTwinHist(ax_toilet_visits, warn_toilet_visits, good_toilet_visits)
 
     # プロット結果をPNG形式でファイル保存
     save_name = gen_imgname(script_name)
