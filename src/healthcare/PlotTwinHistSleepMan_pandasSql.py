@@ -114,10 +114,6 @@ X_LABEL_BED_TIME: str = '就寝時刻 (前日)'
 BED_TIME_MIN: int = -240  # 前日 20:00
 BED_TIME_MAX: int = 60  # 当日 01:00
 STEP_BED_TIME: int = 30
-X_BED_TIME_TICKS: List[str] = [
-    '20:00', '20:30', '21:00', '21:30', '22:00', '22:30',
-    '23:00', '23:30', '00:00', '00:30', '01:00'
-]
 # 3段目: 深い睡眠: 0〜120
 X_LABEL_DEEP_SLEEPING: str = '深い睡眠時間 (分)'
 DEEP_SLEEPING_MIN: int = 0
@@ -246,9 +242,17 @@ def calcBedTimeToMinute(s_curr_date: str, s_wakeup_time: str, s_sleeping_time: s
     return result
 
 
-def makeBedtimeLabels(min_minutes: int, max_minutes, step_minutes=60) -> List[str]:
+def makeBedtimeTicksLabel(ticks_range: range) -> List[str]:
+    """
+    就寝時刻用のX軸ラベルを生成する\n
+      (A) 分が 0なら "00:00"\n
+      (B) 分が正 (当日) ならそのまま変換関数に設定\n
+      (B) 分が負 (前日) なら 24時間プラスした値を変換関数に設定\n
+    :param ticks_range: 就寝時刻用のrangeオブジェクト
+    :return: 就寝時刻用のX軸ラベル
+    """
     result: List[str] = []
-    for minutes in range(min_minutes, max_minutes + 1, step_minutes):
+    for minutes in ticks_range:
         if minutes == 0:
             result.append("00:00")
         elif minutes > 0:
@@ -258,11 +262,6 @@ def makeBedtimeLabels(min_minutes: int, max_minutes, step_minutes=60) -> List[st
             # 前日: 24時プラス
             result.append(minuteToFormatTime(1440 + minutes))
     return result
-
-
-def makeTimeLabels(min_minutes: int, max_minutes, step_minutes=60, hour_full=False) -> List[str]:
-    return [minuteToFormatTime(minute, trim_hour_zero=not hour_full) for minute in
-            range(min_minutes, max_minutes + 1, step_minutes)]
 
 
 def makeTitleWithDayRange(start_day: str, end_day: str) -> str:
@@ -406,8 +405,9 @@ def plotBedtimeTwinBar(ax: Axes, grp_left: Series, grp_right: Series) -> None:
     # X軸範囲
     ax.set_xlim(BED_TIME_MIN, BED_TIME_MAX)
     # X軸ラベルは時刻文字列
-    ax.set_xticks(range(BED_TIME_MIN, BED_TIME_MAX + 1, STEP_BED_TIME),
-                  labels=X_BED_TIME_TICKS, **X_TICKS_STYLE)
+    x_range: range = range(BED_TIME_MIN, BED_TIME_MAX + 1, STEP_BED_TIME)
+    time_ticks: List[str] = makeBedtimeTicksLabel(x_range)
+    ax.set_xticks(x_range, labels=time_ticks, **X_TICKS_STYLE)
     ax.set_xlabel(X_LABEL_BED_TIME, **LABEL_STYLE)
 
 
