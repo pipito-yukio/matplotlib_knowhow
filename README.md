@@ -77,7 +77,7 @@ Python 3.9.2
 ```
 src/useCjkFont/
 ├─ csv
-│   └─ weather_20220903.csv     # サンプルデータ ※2022年09月03日データ
+│   └─ weather_20220903.csv     # サンプルデータ ※2022年09月03日データ
 ├─ plotterweather_multifont.py   # 複数日本語フォント出力スクリプト
 └─ plotterweather_singlefont.py  # 単一日本語フォント出力スクリプト
 ```
@@ -102,20 +102,30 @@ src/healthcare/
 ├─ PlotBloodPressBar_2_sqlalchemy_month.py    # 血圧測定データプロットスクリプト (SQLAlchemy版) 
 ├─ PlotBloodPressBar_3_pandas_month.py        # 血圧測定データプロットスクリプト (pandas版) 
 ├─ PlotSleepManBar2Plot_3_pandas_month.py     # 睡眠管理データプロットスクリプト (SQLAlchemy版) 
-├─ PlotSleepManBar2Plot_4_sqlalchemy_month.py # 睡眠管理データプロットスクリプト (pandas版) 
+├─ PlotSleepManBar2Plot_4_sqlalchemy_month.py # 睡眠管理データプロットスクリプト (pandas版)
+├─ PlotTwinHistSleepMan_pandasSql.py          # 睡眠管理データ度数表プロット (SQLAlchemy + pandas版)
 ├─ conf
-│   └─ db_healthcare.json                     # Postgresql用接続情報
+│   └─ db_healthcare.json                     # Postgresql用接続情報
 ├─ datas
-│   └─ csv
-│       ├─ blood_pressure.csv          # 血圧測定データ 2023-01〜2023-04 の4ヶ月分の実データ
-│       ├─ blood_pressure_202303.csv   # 血圧測定データ ※欠損データ確認用テストデータ
-│       ├─ nocturia_factors.csv        # 夜間頻尿要因データ 2023-01〜2023-04 の4ヶ月分
-│       ├─ nocturia_factors_202303.csv # 夜間頻尿要因データ ※欠損データ確認用テストデータ
-│       ├─ sleep_management.csv        # 睡眠管理データ 2023-01〜2023-04 の4ヶ月分
-│       └─ sleep_management_202303.csv # 睡眠管理データ ※欠損データ確認用テストデータ
+│   └─ csv
+│       ├─ blood_pressure.csv          # 血圧測定データ 2023-01〜2023-04 の4ヶ月分の実データ
+│       ├─ blood_pressure_202303.csv   # 血圧測定データ ※欠損データ確認用テストデータ
+│       ├─ nocturia_factors.csv        # 夜間頻尿要因データ 2023-01〜2023-04 の4ヶ月分
+│       ├─ nocturia_factors_202303.csv # 夜間頻尿要因データ ※欠損データ確認用テストデータ
+│       ├─ sleep_management.csv        # 睡眠管理データ 2023-01〜2023-04 の4ヶ月分
+│       └─ sleep_management_202303.csv # 睡眠管理データ ※欠損データ確認用テストデータ
+├── logs                                              # 各スクリプトの実行ログ
+│   ├── PlotBloodPressBar_3_pandas_month.log
+│   ├── PlotSleepManBar2Plot_3_pandas_month.log
+│   ├── PlotSleepManBar2Plot_4_sqlalchemy_month.log
+│   └── PlotTwinHistSleepMan_pandasSql.log
+├── screen_shots                                      # 各スクリプトの実行後のスクリーンショット 
+│   ├── PlotSleepManBar2Plot_3_pandas_month.png
+│   ├── PlotSleepManBar2Plot_4_sqlalchemy_month.png
+│   └── PlotTwinHistSleepMan_pandasSql.png
 ├── sql
-│   ├── 10_createdb.sql       # 健康管理データベース作成クエリー (PostgreSQL 12)  
-│   └── 11_createtable.sql    # 健康管理テーブル作成クエリー
+│   ├── 10_createdb.sql       # 健康管理データベース作成クエリー (PostgreSQL 12)  
+│   └── 11_createtable.sql    # 健康管理テーブル作成クエリー
 └── util
     ├── __init__.py
     ├── date_util.py
