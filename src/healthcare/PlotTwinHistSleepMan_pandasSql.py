@@ -14,7 +14,6 @@ from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle, Patch
 from matplotlib.container import BarContainer
 
-import pandas
 import pandas as pd
 from pandas.core.frame import DataFrame, Series
 from pandas.core.groupby import DataFrameGroupBy
@@ -554,7 +553,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     try:
         with engineHealthcare.connect() as conn:
-            df_all = pandas.read_sql(
+            df_all = pd.read_sql(
                 text(QUERY_SLEEP_MAN), conn, params=query_params,
                 parse_dates=['measurement_day']
             )
