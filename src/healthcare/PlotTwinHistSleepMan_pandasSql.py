@@ -536,12 +536,13 @@ if __name__ == '__main__':
     # 検索範囲
     start_date = args.start_date
     end_date = args.end_date
+    # ホスト名
+    db_host = args.db_host
     # 日付文字列チェック
     for i_date in [start_date, end_date]:
         if not check_str_date(i_date):
             app_logger.warning(f"Invalid date format ('YYYY-mm-dd'): {i_date}")
             exit(1)
-    db_host = args.db_host
 
     connDict: dict = getDBConnectionWithDict(DB_HEALTHCARE_CONF, hostname=db_host)
     # データベース接続URL生成
