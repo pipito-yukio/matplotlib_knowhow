@@ -25,6 +25,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.sql import text
 
 from util.file_util import gen_imgname
+from util.date_util import check_str_date
 
 """
 特定期間の睡眠スコアが下記条件に対応する並列のヒストグラムを描画する
@@ -535,6 +536,11 @@ if __name__ == '__main__':
     # 検索範囲
     start_date = args.start_date
     end_date = args.end_date
+    # 日付文字列チェック
+    for i_date in [start_date, end_date]:
+        if not check_str_date(i_date):
+            app_logger.warning(f"Invalid date format ('YYYY-mm-dd'): {i_date}")
+            exit(1)
     db_host = args.db_host
 
     connDict: dict = getDBConnectionWithDict(DB_HEALTHCARE_CONF, hostname=db_host)
