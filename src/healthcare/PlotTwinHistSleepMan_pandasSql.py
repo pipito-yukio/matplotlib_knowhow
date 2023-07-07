@@ -305,11 +305,11 @@ def pixelToInch(width_px: int, height_px: int, density: float) -> Tuple[float, f
     return inch_width, inch_height
 
 
-def toHistDictFronDataFrame(df_orig: DataFrame) -> Dict[str, Series]:
+def makeGroupingObjectsForHistogram(df_orig: DataFrame) -> Dict[str, Series]:
     """
-    与えられたDataFrameからプロット用の複数のグルービングオブジェクトを取得する
-    :param df_orig: 指定期間のデータフレーム
-    :return: 複数のグルービングオブジェクトの辞書
+    与えられたDataFrameからヒストグラムプロット用のグルービングオブジェクトを取得する
+    :param df_orig: SQLから生成されたデータフレームを指定条件でフィルタリングされたデータフレーム
+    :return: グルービングオブジェクトの辞書
     """
     # 就寝時刻の計算(分) ※起床時刻の形式("%H:%M")
     day_idx: pd.DatetimeIndex = df_orig.index
@@ -565,7 +565,7 @@ if __name__ == '__main__':
     app_logger.info(f"df_score_good.size: {df_score_good.shape[0]}")
     app_logger.debug(f"df_score_good: {df_score_good}")
     # ヒストグラム用グルービングオブジェクト取得
-    dict_good: Dict[str, Series] = toHistDictFronDataFrame(df_score_good)
+    dict_good: Dict[str, Series] = makeGroupingObjectsForHistogram(df_score_good)
     good_bedtime: Series = dict_good[GROUP_BEDTIME]
     good_deep_sleeping: Series = dict_good[GROUP_DEEP_SLEEPING]
     good_sleeping: Series = dict_good[GROUP_SLEEPING]
@@ -578,7 +578,7 @@ if __name__ == '__main__':
     df_score_warn: DataFrame = df_all.loc[df_all[COL_SLEEP_SCORE] < WARN_SLEEP_SCORE].copy()
     app_logger.info(f"df_score_warn.size: {df_score_warn.shape[0]}")
     app_logger.debug(f"df_score_warn: {df_score_warn}")
-    dict_warn: Dict[str, Series] = toHistDictFronDataFrame(df_score_warn)
+    dict_warn: Dict[str, Series] = makeGroupingObjectsForHistogram(df_score_warn)
     warn_bedtime: Series = dict_warn[GROUP_BEDTIME]
     warn_deep_sleeping: Series = dict_warn[GROUP_DEEP_SLEEPING]
     warn_sleeping: Series = dict_warn[GROUP_SLEEPING]
