@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="assets/css/bootstrap_custom.css" />
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="assets/highlight/styles/default.min.css" />
+        <title>PostgreSQLデータベースからpandasにデータをロードするには</title>
+        <meta name="description" content="How to load data from PostgreSQL database to pandas using SQLAlchemy library.">
+    </head>
+
+    <body>
+        <div class="container" style="max-width: 980px">
+            <h4 class="m-2 text-center">PostgreSQLデータベースからpandasにデータをロードするには</h4>
+            <hr />
+            <div class="update-date">【最終更新日】2023-07-07</div>
+            <p class="indent">
+                SQLAlchemyライブラリを経由するとPostgreSQLデータベースからpandasにデータをロードすることができます。
+            </p>
+            <p class="indent">
+                今回は下記のような画像を作成するためのpandasのread_sql関数の使い方と、右側のような度数データへの加工方法の実装について解説します。
+            </p>
+            <div class="ms-3 mt-2">
+                <div class="text-center">
+                    <figure class="figure">
+                        <figcaption class="figure-caption text-center">
+                            【SQLAlchemy経由でpandasにロードしたデータを元にプロットした画像】
+                        </figcaption>
+                        <img class="figure-img img-fluid" src="13_plotTwinHistSleepMan/images/PlotSleepMan_compare_PlotHist.png" />
+                    </figure>
+                </div>
+            </div>
+            <!-- refercence urls -->
+            <div class="m-2 mb-4">
+                <div>【参考URL】</div>
+                <ul class="ms-2 small">
+                    <li>(1) Pandas <b>API reference [pandas.read_sql]</b><br/>
+    <a href="https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html" target="_blank">
+        https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html</a>
+                    </li>
+                    <li>(2) SQLAlchemy 1.3 Documentation <b>[Working with Engines and Connections]</b><br/>
+    <a href="https://docs.sqlalchemy.org/en/13/core/connections.html" target="_blank">
+        https://docs.sqlalchemy.org/en/13/core/connections.html</a>
+                    </li>
+                </ul>
+                <div class="ms-3 mt-2">
+                    <div>上記参考URL (1) APIのパラメータの説明によると</div>
+                    <ul class="small">
+                        <li>sqlite3の場合はSQL文とconnectionがそのまま扱える</li>
+                        <li>sqlite3以外のデータベースは、SQLAlchemryを通してのみのサポート</li>
+                        <li>SQLAlchemryのconnectionについては、一番下の "See here." (★) が【参考URL】(2)のリンクになっています</li>
+                    </ul>
+<pre class="ms-2 me-2"><code class="small">pandas.read_sql(sql, con, ...以下省略...)
+Parameters
+  sql: str or SQLAlchemy Selectable (select or text object)
+    SQL query to be executed or a table name.
+    
+  con: SQLAlchemy connectable, str, or sqlite3 connection
+    Using SQLAlchemy makes it possible to use any DB supported by that library. 
+    If a DBAPI2 object, only sqlite3 is supported. 
+    The user is responsible for engine disposal and connection closure for the SQLAlchemy connectable; 
+    str connections are closed automatically. See here. (★)
+</code></pre>        
+                </div>
+                <div>【参考にした書籍】</div>
+                <div class="m-2">
+                    <figure class="ms-3">
+                        <blockquote class="small" cite="urn:isbn:978-4-295-00565-0">
+                            第１章 DataFrameの基礎<br>
+                            第10章 groupby演算による分割-適用-結合<br>
+                        </blockquote>
+                        <figcaption class="blockquote-footer">
+                            ➀ <cite>Pythonデータ分析／機械学習のための基本コーディング！ <b>pandas ライブラリ活用入門</b> 【株式会社インプレス】</cite>
+                        </figcaption>
+                    </figure>
+                </div>
+                <div>【当サイトの関連リポジトリ】<span class="small">Personal Healthcare applications</span></div>
+                <div class="ms-3 mt-2">
+                    <dl class="small">
+                        <dt>健康管理アプリの登録画面とWebアプリのIF設計 (テーブル設計含む) の詳細ついては下記をご覧ください</dt>
+                        <dd class="ms-3">
+                            <a href="https://pipito-yukio.github.io/personal_healthcare/01_design_interface.html" target="_blank">
+                                https://pipito-yukio.github.io/personal_healthcare/01_design_interface.html
+                            </a>
+                        </dd>
+                    </dl>
+                </div>
+                <div>【当サイトのソースコードリポジトリ】<span class="small">Matplotlib & Pandas know-how</span></div>
+                <div class="ms-3 mt-2">
+                    <dl class="small">
+                        <dt>使用するソースコードと関連ファイル</dt>
+                        <dd class="ms-3">
+                            <a href="https://github.com/pipito-yukio/matplotlib_knowhow/tree/main/src/healthcare">
+                                https://github.com/pipito-yukio/matplotlib_knowhow/tree/main/src/healthcare
+                            </a>
+                            <div class="ms-2 me-2">
+<pre><code>healthcare/
+    ├── PlotTwinHistSleepMan_pandasSql.py       # 今回説明するPythonスクリプトファイル
+    ├── conf
+    │   └── db_healthcare.json                 # SQLAlchemy用PostgreSQLデータベース接続情報
+    ├── logs
+    │   └── PlotTwinHistSleepMan_pandasSql.log # 実行ログ
+    ├── screen_shots
+    │   └── PlotTwinHistSleepMan_pandasSql.png # このスクリプトで出力したプロット結果のスクリーンショット
+    ├── sql
+    │   ├── 10_createdb.sql                    # 健康管理データベース生成SQL
+    │   └── 11_createtable.sql                 # 健康管理テーブル生成SQL
+    └── util                                    # Pythonスクリプトファイルが参照する関数パッケージ
+        ├── __init__.py
+        ├── date_util.py
+        └── file_util.py</code></pre>
+                            </div>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <h5 class="v-line-start">1. データベース接続情報とテーブル定義・検索クエリー</h5></h5>
+            <div class="m-3">
+                <div class="mb-2">(1) PostgreSQLデータベース用のSQLAlchemy接続情報</div>
+                <ul class="small">
+                    <li>conf/db_healthcare.json
+                        <ul>
+                            <li>{hostname}: {}内のホスト名をデータベースサーバーのホスト名に置換する<br/>
+                                /etc/hosts の抜粋
+<pre><code># 開発機
+192.168.0.101	dell-t7500.local
+# 本番機: ラズベリーパイ
+192.168.0.16    raspi-4 raspi-4.local</code></pre>
+                            </li>
+                        </ul>
+<pre><code class="json">{
+    "drivername": "postgresql+psycopg2",
+    "host": "{hostname}.local",
+    "port": "5432",
+    "database": "healthcare_db",
+    "username": "developer",
+    "password": "developer"
+}</code></pre>
+                    </li>
+                </ul>
+                <div class="mb-2">(2) テーブル定義 ※ <span class="small"><b>sql/11_createtable.sql</b> の抜粋</span></div>
+                <ul class="small">
+                    <li>ユーザーテーブル
+<pre><code class="sql">CREATE TABLE IF NOT EXISTS bodyhealth.person(
+    id smallint NOT NULL,
+    email varchar(50) NOT NULL,
+    name varchar(24) NOT NULL,
+    CONSTRAINT pk_person PRIMARY KEY (id)
+);</code></pre>
+                    </li>
+                    <li>睡眠管理テーブル
+<pre><code class="sql">CREATE TABLE IF NOT EXISTS bodyhealth.sleep_management(
+    pid smallint NOT NULL,
+    measurement_day date NOT NULL,
+    wakeup_time time without time zone NOT NULL,
+    sleep_score smallint,
+    sleeping_time time without time zone NOT NULL,
+    deep_sleeping_time time without time zone
+);</code></pre>
+                    </li>
+                    <li>夜中トイレ回数要因テーブル
+<pre><code class="sql">CREATE TABLE IF NOT EXISTS bodyhealth.nocturia_factors(
+    pid smallint NOT NULL,
+    measurement_day date NOT NULL,
+    midnight_toilet_visits smallint NOT NULL,
+    has_coffee boolean,
+    has_tea boolean,
+    has_alcohol boolean,
+    has_nutrition_drink boolean,
+    has_sports_drink boolean,
+    has_diuretic boolean,
+    take_medicine boolean,
+    take_bathing boolean,
+    condition_memo varchar(255)
+);</code></pre>
+                    </li>
+                </ul>    
+                <div class="mb-2">(3) 検索クエリー</div>
+                <div class="ms-3">
+                    <p class="small">SQLAlchemyのORMマッパーは使わず、下記クエリー文をSQLAlchemyの<b>textオブジェクトにラップ</b>してpandasの<b>read_sql()</b>関数のSQLパラメータに設定します</p>
+<pre><code class="small sql">QUERY_SLEEP_MAN = """
+SELECT
+    to_char(sm.measurement_day,'YYYY-MM-DD') as measurement_day
+    ,to_char(wakeup_time,'HH24:MI') as wakeup_time
+    ,sleep_score
+    ,to_char(sleeping_time, 'HH24:MI') as sleeping_time
+    ,to_char(deep_sleeping_time, 'HH24:MI') as deep_sleeping_time
+    ,midnight_toilet_visits
+FROM
+    bodyhealth.person p
+    INNER JOIN bodyhealth.sleep_management sm ON p.id = sm.pid
+    INNER JOIN bodyhealth.nocturia_factors nf ON p.id = nf.pid
+WHERE
+    email=:emailAddress
+    AND
+    sm.measurement_day BETWEEN :startDay AND :endDay
+    AND
+    sm.measurement_day = nf.measurement_day
+    ORDER BY sm.measurement_day
+"""</code></pre>  
+                </div>          
+            </div>    
+            <h5 class="v-line-start">2. ソースコードの説明</h5>
+            <div class="m-3">
+                <h6>2-1. pandasの処理コード ※SQLAlchemy用処理含む</h6>
+                <div class="ms-2"><!-- START 2-1. pandas -->
+                    <div class="mb-2">(1) 関数定義</div>
+                    <ul class="small">
+                        <li>SQLAlchemyの接続URL用の辞書オブジェクトを取得 ※置換用ホスト名をDBサーバーのホスト名に置き換え
+                            <ul>
+                                <li>ホスト名が未指定(None)なら <b>socket.gethostname()</b> を実行しローカルPCのホスト名を取得</li>
+                                <li>本番機のホスト名が指定されていたらそのホスト名を使用</li>
+                            </ul>
+<pre><code class="python">def getDBConnectionWithDict(file_path: str, hostname: str = None) -&gt; dict:
+    """
+    SQLAlchemyの接続URL用の辞書オブジェクトを取得する
+    :param file_path: 接続設定ファイルパス (JSON形式)
+    :param hostname: ホスト名 ※未設定なら実行PCのホスト名
+    :return: SQLAlchemyのURL用辞書オブジェクト
+    """
+    with open(file_path, 'r') as fp:
+        db_conf: json = json.load(fp)
+        if hostname is None:
+            hostname = socket.gethostname()
+        # host in /etc/hostname: "hostname.local"
+        db_conf["host"] = db_conf["host"].format(hostname=hostname)
+    return db_conf
+</code></pre>
+                        </li>
+                        <li>時刻文字列("時:分")を分に変換 <br/>
+                            <ul>
+                                <li>【使用目的】データベースから取得した時刻・時間関連のフィールドの値は時刻文字列</li>
+                                <li>【計算例】[入力] "05:30" =&gt; [出力] <b>330 (分)</b></li>
+                            </ul>
+<pre><code class="python">def toMinute(s_time: str) -&gt; Optional[int]:
+    """
+    時刻文字列("時:分")を分に変換する
+    :param s_time: 時刻文字列("時:分") ※欠損値有り(None)
+    :return: 分(整数), NoneならNone
+    """
+    if s_time is None:
+        return None
+
+    times: List[str] = s_time.split(":")
+    return int(times[0]) * 60 + int(times[1])</code></pre>
+                        </li>
+                        <li>就寝時刻を計算しdatetime型として取得する: <b>(測定日付+起床時刻) - 睡眠時間 (分)</b>
+<pre><code class="python">def calcBedTime(s_date: str, s_wakeup_time: str, s_sleeping_time: str) -> Optional[datetime]:
+    """
+    就寝時刻を計算する
+    :param s_date: 測定日付文字列(ISO8601) ※必須
+    :param s_wakeup_time: 起床時刻文字列 ("%H:%M") ※必須
+    :param s_sleeping_time: 睡眠時間 ("%H:%M") ※任意 欠損値 None
+    :return: (測定日付+起床時刻) - 睡眠時間 (分)
+    """
+    if pd.isnull(s_sleeping_time):
+        return None
+
+    val_wakeup: datetime = datetime.strptime(f"{s_date} {s_wakeup_time}",
+                                    FMT_DATETIME)
+    val_minutes: int = toMinute(s_sleeping_time)
+    return val_wakeup - timedelta(minutes=val_minutes)</code></pre>
+                        </li>
+                        <li><b>整数でのグルービングを容易にするため</b>当日０時を基準とした就寝時刻(分)を計算する
+                            <ul>
+                                <li>前日に就寝した場合は<b>24時間を引いた時間</b>の時刻部分のみを分に変換</li>
+                                <li>当日に就寝した場合は時間の時刻部分のみ変換</li>
+                            </ul>
+<pre><code class="python">def calcBedTimeToMinute(s_curr_date: str, s_wakeup_time: str, s_sleeping_time: str
+    ) -&gt; Optional[int]:
+    """
+    当日０時を基準とした就寝時刻(分)を計算する ※前日に就寝した場合は負の分
+    :param s_curr_date: 測定日付文字列(ISO8601) ※必須
+    :param s_wakeup_time: 起床時刻文字列 ("%H:%M") ※必須
+    :param s_sleeping_time: 睡眠時間 ("%H:%M") ※任意 欠損値 None
+    :return: 前日なら24時(1440分)をマイナスした経過時間(分), 当日なら0時からの経過時間(分)
+    """
+    if pd.isnull(s_sleeping_time):
+        return None
+
+    bed_time: Optional[datetime] = calcBedTime(s_curr_date, s_wakeup_time, s_sleeping_time)
+    if bed_time is None:
+        return None
+
+    # 時刻部分のみ取り出す
+    f_time: str = bed_time.strftime("%H:%M")
+    bed_time_minutes: int = toMinute(f_time)
+    # 測定日
+    curr_time: datetime = datetime.strptime(s_curr_date, FMT_DATE)
+    result: int
+    if bed_time < curr_time:
+        # 前日に就寝 (負の値) ※ 1440 = 24H*60
+        result = bed_time_minutes - 1440
+    else:
+        # 当日に就寝 (正の値) 00:00 からの経過(分)
+        result = bed_time_minutes
+    return result</code></pre>
+                        </li>
+                        <li>ヒストグラムプロット用のグルービングオブジェクトを取得
+                            <ul>
+                                <li>度数計算用に就寝時刻を計算(分)する</li>
+                                <li>(A) 上記データをキー名"bedtime"でデータフレームに追加する</li>
+                                <li>(B) 度数計算用に睡眠時間を分に変換</li>
+                                <li>(C) 度数計算用に深い睡眠時間を分に変換</li>
+                                <li>それぞれの時刻データの指定間隔でグルービングし度数を計算する</li>
+                                <li>(D) 夜間トイレ回数データをグルービングし度数を計算する</li>
+                                <li>それぞれのグルービングオブジェクトに対応するキーの辞書オブジェクトを生成し返却する</li>
+                            </ul>
+<pre><code class="python">def makeGroupingObjectsForHistogram(df_orig: DataFrame) -&gt; Dict[str, Series]:
+    """
+    与えられたDataFrameからヒストグラムプロット用のグルービングオブジェクトを取得する
+    :param df_orig: SQLから生成されたデータフレームを指定条件でフィルタリングされたデータフレーム
+    :return: グルービングオブジェクトの辞書
+    """
+    # 就寝時刻の計算(分) ※起床時刻の形式("%H:%M")
+    day_idx: pd.DatetimeIndex = df_orig.index
+    day_array: np.ndarray = day_idx.to_pydatetime()
+    bed_times: List[Optional[int]] = [
+        calcBedTimeToMinute(
+            day.strftime(FMT_DATE), wakeup, sleeping) for day, wakeup, sleeping in zip(
+            day_array, df_orig[COL_WAKEUP_TIME], df_orig[COL_SLEEPING_TIME]
+        )
+    ]
+    df_orig[GROUP_BEDTIME] = bed_times
+    # 睡眠時間("%H:%M"): 分(整数)に変換
+    df_orig[COL_SLEEPING_TIME] = df_orig[COL_SLEEPING_TIME].apply(toMinute)
+    # 深い睡眠("%H:%M"): 分(整数)に変換
+    df_orig[COL_DEEP_SLEEPING_TIME] = df_orig[COL_DEEP_SLEEPING_TIME].apply(toMinute)
+    # グループオブジェクト
+    # 就寝時刻
+    ranges = range(BED_TIME_MIN, BED_TIME_MAX + 1, STEP_BED_TIME)
+    grouped_bedtime: DataFrameGroupBy = df_orig.groupby(
+        pd.cut(df_orig[GROUP_BEDTIME], ranges, right=False))
+    # 深い睡眠
+    ranges = range(DEEP_SLEEPING_MIN, DEEP_SLEEPING_MAX + 1, STEP_DEEP_SLEEPING)
+    grouped_deep_sleeping: DataFrameGroupBy = df_orig.groupby(
+        pd.cut(df_orig[COL_DEEP_SLEEPING_TIME], ranges, right=False))
+    # 睡眠時間
+    ranges = range(SLEEPING_MIN, SLEEPING_MAX + 1, STEP_SLEEPING)
+    grouped_sleeping: DataFrameGroupBy = df_orig.groupby(
+        pd.cut(df_orig[COL_SLEEPING_TIME], ranges, right=False))
+    # 夜間トイレ回数
+    ranges = range(TOILET_VISITS_MIN, TOILET_VISITS_MAX + 1, STEP_TOILET_VISITS)
+    grouped_visits: DataFrameGroupBy = df_orig.groupby(
+        pd.cut(df_orig[COL_TOILET_VISITS], ranges, right=False))
+
+    # グルービングしたそれぞれの度数の辞書オブジェクト
+    result: Dict[str, Series] = {
+        GROUP_BEDTIME: grouped_bedtime[COL_SLEEP_SCORE].count(),
+        GROUP_DEEP_SLEEPING: grouped_deep_sleeping[COL_SLEEP_SCORE].count(),
+        GROUP_SLEEPING: grouped_sleeping[COL_SLEEP_SCORE].count(),
+        GROUP_TOILET_VISITS: grouped_visits[COL_SLEEP_SCORE].count()
+    }
+    return result</code></pre>    
+                        </li>
+                    </ul>
+                    <div class="mb-2">(2) スクリプトメイン</div>
+                    <ul class="small">
+                        <li>1-1. インポート ※pandas, sqlalchemy 関連処理のみ
+<pre><code class="python">import argparse
+import json
+import os
+import socket
+from datetime import datetime, timedelta
+# ...一部省略...
+import pandas as pd
+from pandas.core.frame import DataFrame, Series
+from pandas.core.groupby import DataFrameGroupBy
+
+import sqlalchemy
+from sqlalchemy.engine.url import URL
+from sqlalchemy import create_engine
+from sqlalchemy.sql import text
+# ...一部省略...
+import util.date_util as du
+from util.date_util import check_str_date</code></pre>
+                        </li>
+                        <li>1-2. 定数定義 ※pandas, SQLAlchemy関連処理のみ
+<pre><code class="python"># 健康管理データベース接続情報
+DB_HEALTHCARE_CONF: str = os.path.join("conf", "db_healthcare.json")
+
+# 検索クエリー ※ソースにないコメントをカラムの末尾に追加しています
+QUERY_SLEEP_MAN = """
+SELECT
+    to_char(sm.measurement_day,'YYYY-MM-DD') as measurement_day    -- 測定日
+    ,to_char(wakeup_time,'HH24:MI') as wakeup_time                 -- 起床時刻
+    ,sleep_score                                                   -- 睡眠スコア
+    ,to_char(sleeping_time, 'HH24:MI') as sleeping_time            -- 睡眠時間
+    ,to_char(deep_sleeping_time, 'HH24:MI') as deep_sleeping_time  -- 深い睡眠時間
+    ,midnight_toilet_visits                                        -- 夜間トイレ回数 ※ nocturia_factorsテーブル
+FROM
+    bodyhealth.person p
+    INNER JOIN bodyhealth.sleep_management sm ON p.id = sm.pid
+    INNER JOIN bodyhealth.nocturia_factors nf ON p.id = nf.pid
+WHERE
+    email=:emailAddress
+    AND
+    sm.measurement_day BETWEEN :startDay AND :endDay
+    AND
+    sm.measurement_day = nf.measurement_day
+    ORDER BY sm.measurement_day
+"""
+# ISO8601フォーマット    
+FMT_DATE: str = '%Y-%m-%d'
+# datetime変換フォーマット ※psqlでのCSVエクスポートが秒まで出力
+FMT_DATETIME: str = '%Y-%m-%d %H:%M:%S'
+# ...一部省略...
+# 集計する睡眠スコアの基準値
+# df['sleep_score'] >= EGOOD_SLEEP_SCORE
+GOOD_SLEEP_SCORE: int = 80
+# df['sleep_score'] < WARN_SLEEP_SCORE
+WARN_SLEEP_SCORE: int = 75
+# SQLで取得したカラム名
+COL_WAKEUP_TIME: str = 'wakeup_time'
+COL_SLEEP_SCORE: str = 'sleep_score'
+COL_SLEEPING_TIME: str = 'sleeping_time'
+COL_DEEP_SLEEPING_TIME: str = 'deep_sleeping_time'
+COL_TOILET_VISITS: str = 'midnight_toilet_visits'
+# グルービング名
+GROUP_BEDTIME: str = 'bed_time'
+GROUP_DEEP_SLEEPING: str = 'deep_sleeping'
+GROUP_SLEEPING: str = 'sleeping'
+GROUP_TOILET_VISITS: str = 'toilet_visits'</code></pre>
+                        </li>
+                        <li>2. コマンドラインオプション
+                            <ul>
+                                <li>メールアドレス (■必須): (例) --mail-address user1@examples.com</li>
+                                <li>検索開始日 (■必須): (例) --start-date 2023-01-01</li>
+                                <li>検索終了日 (■必須): (例) --start-date 2023-03-31</li>
+                                <li>ホスト名 (任意): (例) --db-host raspi-4</li>
+                            </ul>
+<pre><code class="python">if __name__ == '__main__':
+    # ログ処理部分は省略
+    parser: argparse.ArgumentParser = argparse.ArgumentParser()
+    # メールアドレス (例) user1@examples.com
+    parser.add_argument("--mail-address", type=str, required=True,
+                        help="Healthcare Database Person mailAddress.")
+    # 検索開始日
+    parser.add_argument("--start-date", type=str, required=True,
+                        help="2023-04-01")
+    # 検索終了日
+    parser.add_argument("--end-date", type=str, required=True,
+                        help="2023-04-30")
+    # ホスト名 ※任意 (例) raspi-4
+    parser.add_argument("--db-host", type=str, help="Other database hostname.")
+    args: argparse.Namespace = parser.parse_args()
+    # 選択クエリーの主キー: メールアドレス
+    mail_address: str = args.mail_address
+    # 検索範囲
+    start_date = args.start_date
+    end_date = args.end_date
+    db_host = args.db_host</code></pre>
+                        </li>
+                        <li>3. 日付妥当性チェックでNGならウォーニングを出力して終了
+<pre><code class="python">    # 日付文字列チェック
+    for i_date in [start_date, end_date]:
+        if not check_str_date(i_date):
+            app_logger.warning(f"Invalid date format ('YYYY-mm-dd'): {i_date}")
+            exit(1)</code></pre>
+                        </li>
+                        <li>4.(1) データベース接続URL生成<br/>
+                            生成される接続情報 (例) connUrl = postgresql+psycopg2://developer:developer@raspi-4.local:5432/healthcare_db
+<pre><code class="python">    # データベース接続URL生成
+    connDict: dict = getDBConnectionWithDict(DB_HEALTHCARE_CONF, hostname=db_host)
+    # データベース接続URL生成
+    connUrl: URL = URL.create(**connDict)</code></pre>
+                        </li>
+                        <li>4.(2) SQLAlchemyデータベースエンジンの取得
+<pre><code class="python">    engineHealthcare: sqlalchemy.Engine = create_engine(connUrl, echo=False)</code></pre>
+                        </li>
+                        <li>5.(1) SQLクエリーを実行しDataFrameを生成する
+                            <ul>
+                                <li>(A) クエリーパラメータを辞書オブジェクトに設定する
+                                    <ul>
+                                        <li>email=<b>:emailAddress</b></li>
+                                        <li>sm.measurement_day BETWEEN <b>:startDay</b> AND <b>:endDay</b></li>
+                                    </ul>
+                                </li>
+                                <li>(B) engineHealthcare.connect()コンテキストのデータベース接続(conn)を取得</li>
+                                <li>(C) SQL文字列を SQLAlchemyのtext()メソッドにラップする</li>
+                                <li>上記 (A)〜(C)を pd.read_sql()関数の該当パラメータに設定する</li>
+                            </ul>
+<pre><code class="python">    query_params: Dict = {"emailAddress": mail_address, "startDay": start_date, "endDay": end_date}
+    try:
+        with engineHealthcare.connect() as conn:
+            df_all = pd.read_sql(
+                text(QUERY_SLEEP_MAN), conn, params=query_params,
+                parse_dates=['measurement_day']
+            )
+    except Exception as err:
+        app_logger.warning(err)
+        exit(1)
+</code></pre>
+                        <li>5.(2) 睡眠スコアの条件に応じたグルービングオブジェクトを生成する ※ログ出力処理を省略しています
+                            <ul>
+                                <li>測定日('measurement_day')をデータフレームのインデックスに設定
+<pre><code class="python">    df_all: DataFrame = df_all.set_index('measurement_day')</code></pre>
+                                </li>    
+                                <li>睡眠スコアが<b>良い(>=80)</b>データ(<b>コピー</b>)の度数データを取得する
+<pre><code class="python">    df_score_good: DataFrame = df_all.loc[df_all[COL_SLEEP_SCORE] >= GOOD_SLEEP_SCORE].copy()
+    # ヒストグラム用グルービングオブジェクト取得
+    dict_good: Dict[str, Series] = makeGroupingObjectsForHistogram(df_score_good)
+    good_bedtime: Series = dict_good[GROUP_BEDTIME]
+    good_deep_sleeping: Series = dict_good[GROUP_DEEP_SLEEPING]
+    good_sleeping: Series = dict_good[GROUP_SLEEPING]
+    good_toilet_visits: Series = dict_good[GROUP_TOILET_VISITS]</code></pre>
+                                </li>
+                                <li>睡眠スコアが<b>悪い(<75)</b>データ(<b>コピー</b>)の度数データを取得する
+<pre><code class="python">    df_score_warn: DataFrame = df_all.loc[df_all[COL_SLEEP_SCORE] < WARN_SLEEP_SCORE].copy()
+    dict_warn: Dict[str, Series] = makeGroupingObjectsForHistogram(df_score_warn)
+    warn_bedtime: Series = dict_warn[GROUP_BEDTIME]
+    warn_deep_sleeping: Series = dict_warn[GROUP_DEEP_SLEEPING]
+    warn_sleeping: Series = dict_warn[GROUP_SLEEPING]
+    warn_toilet_visits: Series = dict_warn[GROUP_TOILET_VISITS]</code></pre>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div><!-- END 2-1. pandas -->
+                
+                <h5 class="v-line-start">3. コマンドラインからスクリプト実行</h5>
+                <div class="m-3">
+                    <ul class="small">
+                        <li>Python仮想環境に切り替える
+<pre><code class="bash">$ . py_venv/py_healthcare_tool/bin/activate</code></pre>
+                        </li>
+                        <li>実行 ※見やすいよう改行をいれていますが１行です
+<pre><code class="bash">(py_healthcare_tool) $ python PlotTwinHistSleepMan_pandasSql.py
+    --mail-address user1@examples.com
+    -start-date 2023-01-01 --end-date 2023-01-31</code></pre>
+                        </li>
+                    </ul>
+                    <div>【実行ログ】以下は度数データ部分のみの抜粋となります
+                        <ul>
+                            <li class="small">睡眠スコアが<b>良い(>=80)</b>データの度数データの内容
+<pre><code class="bash">INFO good_bedtime: bed_time
+[-240, -210)    0
+[-210, -180)    0
+[-180, -150)    0
+[-150, -120)    2
+[-120, -90)     2
+[-90, -60)      2
+[-60, -30)      7
+[-30, 0)        0
+[0, 30)         0
+[30, 60)        0
+Name: sleep_score, dtype: int64
+INFO good_deep_sleeping: deep_sleeping_time
+[0, 10)       0
+[10, 20)      0
+[20, 30)      0
+[30, 40)      0
+[40, 50)      1
+[50, 60)      1
+[60, 70)      4
+[70, 80)      7
+[80, 90)      0
+[90, 100)     0
+[100, 110)    0
+[110, 120)    0
+Name: sleep_score, dtype: int64
+INFO good_sleeping: sleeping_time
+[240, 270)    0
+[270, 300)    0
+[300, 330)    0
+[330, 360)    0
+[360, 390)    2
+[390, 420)    4
+[420, 450)    6
+[450, 480)    0
+[480, 510)    1
+[510, 540)    0
+[540, 570)    0
+[570, 600)    0
+Name: sleep_score, dtype: int64
+INFO good_toilet_visits: midnight_toilet_visits
+[0, 1)    0
+[1, 2)    5
+[2, 3)    5
+[3, 4)    1
+[4, 5)    1
+[5, 6)    1
+[6, 7)    0
+Name: sleep_score, dtype: int64</code></pre>
+                            </li>
+                            <li class="small">睡眠スコアが<b>悪い(<75)</b>データの度数データの内容
+<pre><code class="bash">INFO warn_bedtime: bed_time
+[-240, -210)    0
+[-210, -180)    0
+[-180, -150)    0
+[-150, -120)    0
+[-120, -90)     0
+[-90, -60)      3
+[-60, -30)      2
+[-30, 0)        3
+[0, 30)         3
+[30, 60)        0
+Name: sleep_score, dtype: int64
+INFO warn_deep_sleeping: deep_sleeping_time
+[0, 10)       0
+[10, 20)      2
+[20, 30)      3
+[30, 40)      3
+[40, 50)      1
+[50, 60)      2
+[60, 70)      0
+[70, 80)      1
+[80, 90)      0
+[90, 100)     0
+[100, 110)    0
+[110, 120)    0
+Name: sleep_score, dtype: int64
+INFO warn_sleeping: sleeping_time
+[240, 270)    0
+[270, 300)    0
+[300, 330)    0
+[330, 360)    3
+[360, 390)    3
+[390, 420)    3
+[420, 450)    2
+[450, 480)    0
+[480, 510)    1
+[510, 540)    0
+[540, 570)    0
+[570, 600)    0
+Name: sleep_score, dtype: int64
+INFO warn_toilet_visits: midnight_toilet_visits
+[0, 1)    0
+[1, 2)    3
+[2, 3)    2
+[3, 4)    2
+[4, 5)    3
+[5, 6)    2
+[6, 7)    0
+Name: sleep_score, dtype: int64</code></pre>
+                            </li>                        
+                        </ul>
+                </div>
+            </div>
+
+            <div class="row mb-5">
+                <dl>
+                    <dt class="indent">リポジトリに戻る<dt>
+                    <dd class="indent mt-2">
+                        <a href="https://github.com/pipito-yukio/matplotlib_knowhow">https://github.com/pipito-yukio/matplotlib_knowhow</a>
+                    </dd>    
+                </dl>
+            </div>
+        </div>
+        <script src="assets/highlight/js/highlight.min.js"></script>
+        <script src="assets/highlight/js/java.min.js"></script>
+        <script src="assets/highlight/js/cpp.min.js"></script>
+        <script>
+            hljs.highlightAll();
+        </script>
+        </div>
+    </body>
+</html>
