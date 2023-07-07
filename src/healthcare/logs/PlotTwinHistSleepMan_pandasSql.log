@@ -1,0 +1,186 @@
+(py_healthcare_tool) $ python PlotTwinHistSleepMan_pandasSql.py --mail-address user1@examples.com --start-date 2023-01-01 --end-date 2023-01-31
+INFO shape: (31, 6)
+INFO columns: Index(['measurement_day', 'wakeup_time', 'sleep_score', 'sleeping_time',
+       'deep_sleeping_time', 'midnight_toilet_visits'],
+      dtype='object')
+DEBUG df_all:                 wakeup_time  sleep_score sleeping_time deep_sleeping_time  midnight_toilet_visits
+measurement_day                                                                                  
+2023-01-01            07:00           75         06:50              01:00                       5
+2023-01-02            05:40           82         06:30              01:10                       5
+2023-01-03            05:30           80         08:00              01:00                       2
+2023-01-04            05:20           72         06:50              00:10                       1
+2023-01-05            05:30           92         06:50              01:10                       1
+2023-01-06            05:00           84         07:10              01:00                       2
+2023-01-07            06:10           82         07:10              01:00                       3
+2023-01-08            06:10           84         07:00              01:00                       2
+2023-01-09            05:30           59         06:40              00:20                       5
+2023-01-10            05:10           73         06:40              00:30                       3
+2023-01-11            05:30           80         06:40              00:50                       2
+2023-01-12            05:20           83         07:10              00:40                       1
+2023-01-13            05:30           84         07:10              01:10                       4
+2023-01-14            07:10           72         06:00              00:50                       4
+2023-01-15            06:50           65         07:00              00:30                       4
+2023-01-16            05:30           79         06:20              01:00                       3
+2023-01-17            05:40           85         06:40              01:10                       1
+2023-01-18            05:40           73         05:30              00:50                       2
+2023-01-19            05:30           78         06:30              00:30                       1
+2023-01-20            05:30           77         06:10              00:50                       1
+2023-01-21            07:10           71         07:00              00:40                       3
+2023-01-22            06:30           79         07:20              01:00                       4
+2023-01-23            05:30           74         05:40              01:10                       4
+2023-01-24            05:30           89         06:10              01:10                       1
+2023-01-25            05:40           68         05:50              00:20                       1
+2023-01-26            05:30           87         06:10              01:10                       2
+2023-01-27            05:10           68         06:10              00:30                       2
+2023-01-28            08:00           71         08:00              00:10                       5
+2023-01-29            06:20           90         07:10              01:10                       1
+2023-01-30            05:30           79         06:30              00:50                       1
+2023-01-31            05:30           66         06:20              00:20                       1
+INFO df_score_good.size: 13
+DEBUG df_score_good:                 wakeup_time  sleep_score sleeping_time deep_sleeping_time  midnight_toilet_visits
+measurement_day                                                                                  
+2023-01-02            05:40           82         06:30              01:10                       5
+2023-01-03            05:30           80         08:00              01:00                       2
+2023-01-05            05:30           92         06:50              01:10                       1
+2023-01-06            05:00           84         07:10              01:00                       2
+2023-01-07            06:10           82         07:10              01:00                       3
+2023-01-08            06:10           84         07:00              01:00                       2
+2023-01-11            05:30           80         06:40              00:50                       2
+2023-01-12            05:20           83         07:10              00:40                       1
+2023-01-13            05:30           84         07:10              01:10                       4
+2023-01-17            05:40           85         06:40              01:10                       1
+2023-01-24            05:30           89         06:10              01:10                       1
+2023-01-26            05:30           87         06:10              01:10                       2
+2023-01-29            06:20           90         07:10              01:10                       1
+INFO good_bedtime: bed_time
+[-240, -210)    0
+[-210, -180)    0
+[-180, -150)    0
+[-150, -120)    2
+[-120, -90)     2
+[-90, -60)      2
+[-60, -30)      7
+[-30, 0)        0
+[0, 30)         0
+[30, 60)        0
+Name: sleep_score, dtype: int64
+INFO good_deep_sleeping: deep_sleeping_time
+[0, 10)       0
+[10, 20)      0
+[20, 30)      0
+[30, 40)      0
+[40, 50)      1
+[50, 60)      1
+[60, 70)      4
+[70, 80)      7
+[80, 90)      0
+[90, 100)     0
+[100, 110)    0
+[110, 120)    0
+Name: sleep_score, dtype: int64
+INFO good_sleeping: sleeping_time
+[240, 270)    0
+[270, 300)    0
+[300, 330)    0
+[330, 360)    0
+[360, 390)    2
+[390, 420)    4
+[420, 450)    6
+[450, 480)    0
+[480, 510)    1
+[510, 540)    0
+[540, 570)    0
+[570, 600)    0
+Name: sleep_score, dtype: int64
+INFO good_toilet_visits: midnight_toilet_visits
+[0, 1)    0
+[1, 2)    5
+[2, 3)    5
+[3, 4)    1
+[4, 5)    1
+[5, 6)    1
+[6, 7)    0
+Name: sleep_score, dtype: int64
+INFO df_score_warn.size: 12
+DEBUG df_score_warn:                 wakeup_time  sleep_score sleeping_time deep_sleeping_time  midnight_toilet_visits
+measurement_day                                                                                  
+2023-01-04            05:20           72         06:50              00:10                       1
+2023-01-09            05:30           59         06:40              00:20                       5
+2023-01-10            05:10           73         06:40              00:30                       3
+2023-01-14            07:10           72         06:00              00:50                       4
+2023-01-15            06:50           65         07:00              00:30                       4
+2023-01-18            05:40           73         05:30              00:50                       2
+2023-01-21            07:10           71         07:00              00:40                       3
+2023-01-23            05:30           74         05:40              01:10                       4
+2023-01-25            05:40           68         05:50              00:20                       1
+2023-01-27            05:10           68         06:10              00:30                       2
+2023-01-28            08:00           71         08:00              00:10                       5
+2023-01-31            05:30           66         06:20              00:20                       1
+INFO warn_bedtime: bed_time
+[-240, -210)    0
+[-210, -180)    0
+[-180, -150)    0
+[-150, -120)    0
+[-120, -90)     0
+[-90, -60)      3
+[-60, -30)      2
+[-30, 0)        3
+[0, 30)         3
+[30, 60)        0
+Name: sleep_score, dtype: int64
+INFO warn_deep_sleeping: deep_sleeping_time
+[0, 10)       0
+[10, 20)      2
+[20, 30)      3
+[30, 40)      3
+[40, 50)      1
+[50, 60)      2
+[60, 70)      0
+[70, 80)      1
+[80, 90)      0
+[90, 100)     0
+[100, 110)    0
+[110, 120)    0
+Name: sleep_score, dtype: int64
+INFO warn_sleeping: sleeping_time
+[240, 270)    0
+[270, 300)    0
+[300, 330)    0
+[330, 360)    3
+[360, 390)    3
+[390, 420)    3
+[420, 450)    2
+[450, 480)    0
+[480, 510)    1
+[510, 540)    0
+[540, 570)    0
+[570, 600)    0
+Name: sleep_score, dtype: int64
+INFO warn_toilet_visits: midnight_toilet_visits
+[0, 1)    0
+[1, 2)    3
+[2, 3)    2
+[3, 4)    2
+[4, 5)    3
+[5, 6)    2
+[6, 7)    0
+Name: sleep_score, dtype: int64
+INFO figure.dpi[px]: 0.01
+INFO px[2.75]: 0.005
+INFO fig_width_inch: 5.32, fig_height_inch: 8.52
+DEBUG pa1.child: Rectangle(xy=(-0.4, 0), width=0.4, height=0, angle=0)
+DEBUG pa1.child: Rectangle(xy=(0.6, 0), width=0.4, height=3, angle=0)
+DEBUG pa1.child: Rectangle(xy=(1.6, 0), width=0.4, height=2, angle=0)
+DEBUG pa1.child: Rectangle(xy=(2.6, 0), width=0.4, height=2, angle=0)
+DEBUG pa1.child: Rectangle(xy=(3.6, 0), width=0.4, height=3, angle=0)
+DEBUG pa1.child: Rectangle(xy=(4.6, 0), width=0.4, height=2, angle=0)
+DEBUG pa1.child: Rectangle(xy=(5.6, 0), width=0.4, height=0, angle=0)
+DEBUG pa2.child: Rectangle(xy=(-2.77556e-17, 0), width=0.4, height=0, angle=0)
+DEBUG pa2.child: Rectangle(xy=(1, 0), width=0.4, height=5, angle=0)
+DEBUG pa2.child: Rectangle(xy=(2, 0), width=0.4, height=5, angle=0)
+DEBUG pa2.child: Rectangle(xy=(3, 0), width=0.4, height=1, angle=0)
+DEBUG pa2.child: Rectangle(xy=(4, 0), width=0.4, height=1, angle=0)
+DEBUG pa2.child: Rectangle(xy=(5, 0), width=0.4, height=1, angle=0)
+DEBUG pa2.child: Rectangle(xy=(6, 0), width=0.4, height=0, angle=0)
+INFO screen_shots/PlotTwinHistSleepMan_pandasSql.png
+
