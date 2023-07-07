@@ -122,7 +122,7 @@ src/healthcare/
     └── file_util.py
 ```
 
-### 4-1. 睡眠管理データの可視化
+### 4-1. (1) 睡眠管理データの可視化
 
 Androidアプリの睡眠管理データ入力とアプリに提供予定の可視化画像
 
@@ -130,10 +130,23 @@ Androidアプリの睡眠管理データ入力とアプリに提供予定の可�
 - 可視化だけなら SQLAlchemyを使ったほうが容易ですが、月間データの場合は統計情報も計算したいので Flaskアプリで実装する場合は SQLAlchemy + pandas を組み合わせることになります。
 
 >コードの詳しい説明は下記コンテンツ(Github Pages)をご覧ください  
-https://pipito-yukio.github.io/matplotlib_knowhow/11_plotSleepManBar_1_pandas.html  
+https://pipito-yukio.github.io/matplotlib_knowhow/11_plotSleepManBar_1_pandas.html
 
 <div>
 <img src="images/SleepManVisualizeForAndroidApp.png" width="600">
+</div>
+<br/>
+
+### 4-1. (2) 睡眠管理データをpandasで度数データに加工して可視化
+
+- 右側の度数グラフ画像は SQLAlchemy + pandas ライブラリで出力しています。
+- こうしたデータの加工が必要な場合は pandas ライブラリを使用するほうが実装がかんたんになります。
+
+>コードの詳しい説明は下記コンテンツ(Github Pages)をご覧ください  
+https://pipito-yukio.github.io/matplotlib_knowhow/13_plotTwinHistSleepMan_1_pandas.html
+
+<div>
+<img src="docs/13_plotTwinHistSleepMan/images/PlotSleepMan_compare_PlotHist.png" width="600">
 </div>
 <br/>
 
