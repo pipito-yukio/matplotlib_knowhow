@@ -1,0 +1,8 @@
+{
+  "drivername": "postgresql+psycopg2",
+  "host": "{hostname}.local",
+  "port": "5432",
+  "database": "sensors_pgdb",
+  "username": "developer",
+  "password": "yourpassword"
+}
