@@ -4,18 +4,14 @@ import json
 import os
 import socket
 from datetime import date, datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib import rcParams
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.patches import Patch
 
-import pandas
 import pandas as pd
 from pandas.core.frame import DataFrame, Series
 
@@ -138,7 +134,7 @@ def getMeasurementTimeRangeData(cls_sess: scoping.scoped_session, qry_params: Di
     app_logger.info(f"scoped_session: {sess_obj}")
     try:
         with sess_obj.connection() as conn:
-            read_df = pandas.read_sql(
+            read_df = pd.read_sql(
                 text(QUERY_RANGE_DATA), conn, params=qry_params,
                 parse_dates=[COL_TIME]
             )
