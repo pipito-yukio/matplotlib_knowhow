@@ -1,0 +1,15 @@
+$ cat /etc/hosts
+127.0.0.1	localhost
+127.0.1.1	Dell-T7500
+# Development PC
+192.168.0.101	dell-t7500.local
+# Development PC for Android
+192.168.0.103	hp-z820.local
+# Synology NAS DS218: Development database storage
+192.168.0.201	syn-ds218p
+
+# Rasberry pi zero
+192.168.0.12    raspi-zero raspi-zero.local
+# Rasberry pi 4 Model B: PostgreSQL for docker
+192.168.0.16    raspi-4 raspi-4.local
+

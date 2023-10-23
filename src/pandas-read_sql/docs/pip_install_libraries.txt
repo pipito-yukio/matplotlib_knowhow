@@ -1,0 +1,28 @@
+■ python仮想環境でインストールするライブラリ
+
+0.python仮想環境を作成しライブラリをインストールする
+
+$ python3 -m venv py_visualize
+$ . py_visualize/bin/activate
+(py_visualize) $
+インストールが完了したら
+(py_visualize) $ deactivate
+$
+
+1.SQLite3データベース利用の場合 ※python標準なのでDBライブラリ不要
+
+$ pip install pandas matplotlib
+
+
+2.PostgreSQLで psycopg2を利用する場合 
+ ※dockerでPostgreSQLを稼働させる。ただし PostgreSQL clientはインストールしないため psycopg2-binaryを利用
+
+pip install pandas matplotlib psycopg2-binary
+
+
+3.PostgreSQLで SQLAlchemyライブラリを利用する
+ ※各データベースのライブラリも必要
+
+pip install pandas matplotlib psycopg2-binary sqlalchemy
+以上
+
