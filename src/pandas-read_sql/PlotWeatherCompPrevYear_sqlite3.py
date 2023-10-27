@@ -38,7 +38,10 @@ OUT_HTML = """
 # インデックス
 COL_TIME: str = "measurement_time"
 
-# 気象データINSERT ※datetime型はデフオルトで"unixepoch"+"localtime"で登録される
+# 気象データINSERT ※measurement_timeは"unixepoch"+"localtime"で登録される
+# https://docs.python.org/ja/3/library/sqlite3.html
+#  sqlite3 --- SQLite データベースに対する DB-API 2.0 インターフェース
+#    接続(connection)コンテキストマネージャの使い方
 """
 (登録SQL: INSERT_WEATHER)
   INSERT INTO t_weather(did, measurement_time, temp_out, temp_in, humid, pressure) 
@@ -138,7 +141,8 @@ def save_text(file, contents):
         fp.write(contents)
 
 
-def get_connection(db_file_path, auto_commit=False, read_only=False, logger=None):
+def get_connection(db_file_path,
+                   auto_commit=False, read_only=False, logger=None) -> sqlite3.Connection:
     try:
         if read_only:
             db_uri = "file://{}?mode=ro".format(db_file_path)
@@ -154,7 +158,7 @@ def get_connection(db_file_path, auto_commit=False, read_only=False, logger=None
     return connection
 
 
-def get_dataframe(connection,
+def get_dataframe(connection: sqlite3.Connection,
                   device_name: str, year_month: str,
                   logger: Optional[logging.Logger] = None) -> DataFrame:
     from_date: str = year_month + "-01"
@@ -175,7 +179,7 @@ def get_dataframe(connection,
     return df
 
 
-def get_all_df(connection,
+def get_all_df(connection: sqlite3.Connection,
                device_name: str, curr_year_month: str,
                logger: Optional[logging.Logger] = None
                ) -> Tuple[Optional[DataFrame], Optional[DataFrame], Optional[str]]:
