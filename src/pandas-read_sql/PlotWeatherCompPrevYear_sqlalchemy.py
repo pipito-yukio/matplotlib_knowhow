@@ -203,7 +203,7 @@ if __name__ == '__main__':
         sess_factory = sessionmaker(bind=eng_autocommit)
         app_logger.info(f"sess_factory: {sess_factory}")
         # Sessionクラスは sqlalchemy.orm.scoping.scoped_session
-        Cls_sess = scoped_session(sess_factory)
+        Cls_sess: scoping.scoped_session = scoped_session(sess_factory)
         app_logger.info(f"Session class: {Cls_sess}")
         curr_df: Optional[DataFrame]
         prev_df: Optional[DataFrame]

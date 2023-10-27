@@ -13,7 +13,9 @@ from matplotlib.patches import Patch
 import numpy as np
 from pandas.core.frame import DataFrame, Series
 
-""" 前年と比較した気象データ画像のbase64エンコードテキストデータを出力する """
+""" 
+前年と比較した気象データ画像のbase64エンコードテキストデータを出力する
+"""
 
 rcParams['font.family'] = "sans-serif"
 rcParams['font.sans-serif'] = ["IPAexGothic"]
@@ -32,15 +34,12 @@ Y_LABEL_PRESSURE: str = '気　圧 (hPa)'
 Y_LABEL_TEMP: str = '気温 (℃)'
 Y_LABEL_TEMP_OUT: str = '外気温 (℃)'
 
-# 気圧
-Y_PRESSURE_MIN: float = 960.
-Y_PRESSURE_MAX: float = 1060.
 # タイトルフォーマット
 FMT_MEASUREMENT_RANGE: str = "{} − {} データ比較"
 # 平均値文字列
 FMT_JP_YEAR_MONTH: str = "{year}年{month}月"
 FMT_AVEG_TEXT: str = "{jp_year_month} 平均{type} {value:#.1f} {unit}"
-DICT_AVE_TEMP: Dict = {'type': '気温', 'unit': '℃'}
+DICT_AVEG_TEMP: Dict = {'type': '気温', 'unit': '℃'}
 DICT_AVEG_HUMID: Dict = {'type': '湿度', 'unit': '％'}
 DICT_AVEG_PRESSURE: Dict = {'type': '気圧', 'unit': 'hPa'}
 # 描画領域のグリッド線スタイル: Y方向のグリッド線のみ表示
@@ -55,8 +54,6 @@ PREV_COLOR: str = 'C1'
 AVEG_LINE_STYLE: Dict = {'linestyle': 'dashdot', 'linewidth': 1.}
 CURR_AVEG_LINE_STYLE: Dict = {'color': CURR_COLOR, **AVEG_LINE_STYLE}
 PREV_AVEG_LINE_STYLE: Dict = {'color': PREV_COLOR, **AVEG_LINE_STYLE}
-# X軸のラベルスタイル
-X_TICKS_STYLE: Dict = {'fontsize': 8, 'fontweight': 'heavy', 'rotation': 90}
 # プロット領域のラベルスタイル
 LABEL_STYLE: Dict = {'fontsize': 10, }
 # 凡例スタイル
@@ -65,7 +62,7 @@ LEGEND_STYLE: Dict = {'fontsize': 10, }
 TITLE_STYLE: Dict = {'fontsize': 11, }
 
 
-def plusOneYear(prev_datetime: datetime) -> datetime:
+def datetime_plus_1_year(prev_datetime: datetime) -> datetime:
     """
     前年のdatetimeオブジェクトに1年プラスしたdatetimeオブジェクトを取得する
     :param prev_datetime: 前年のdatetimeオブジェクト
@@ -81,7 +78,7 @@ def plusOneYear(prev_datetime: datetime) -> datetime:
     return next_val
 
 
-def makeLegendLabel(s_year_month: str) -> str:
+def make_legend_label(s_year_month: str) -> str:
     """
     凡例用ラベル生成
     :param s_year_month: 年月文字列
@@ -91,7 +88,7 @@ def makeLegendLabel(s_year_month: str) -> str:
     return FMT_JP_YEAR_MONTH.format(year=parts[0], month=parts[1])
 
 
-def makeAvePatch(plot_label, f_ave: float, s_color: str, dict_ave: Dict) -> Patch:
+def make_average_patch(plot_label, f_ave: float, s_color: str, dict_ave: Dict) -> Patch:
     """
     平均値パッチ生成
     :param plot_label:
@@ -101,7 +98,7 @@ def makeAvePatch(plot_label, f_ave: float, s_color: str, dict_ave: Dict) -> Patc
     @return:
     """
 
-    def makeAvegText(jp_year_month: str, value: float, data_dict: Dict) -> str:
+    def make_average_text(jp_year_month: str, value: float, data_dict: Dict) -> str:
         """
         平均値用の文字列生成
         :param jp_year_month: 日本語年月文字列
@@ -113,29 +110,25 @@ def makeAvePatch(plot_label, f_ave: float, s_color: str, dict_ave: Dict) -> Patc
         data_dict['value'] = value
         return FMT_AVEG_TEXT.format(**data_dict)
 
-    s_ave = makeAvegText(plot_label, f_ave, dict_ave)
+    s_ave = make_average_text(plot_label, f_ave, dict_ave)
     return Patch(color=s_color, label=s_ave)
 
 
-def setYLimWithAxes(plot_axes: Axes,
-                    curr_ser: Series, prev_ser: Series,
-                    curr_temp_ser: Series, prev_temp_ser: Series) -> None:
+def set_ylim_with_axes(plot_axes: Axes, curr_ser: Series, prev_ser: Series) -> None:
     """
     各データの最大値・最小値を設定する
     :param plot_axes: プロット領域
     :param curr_ser: 最新データ
     :param prev_ser: 前年データ
-    :param curr_temp_ser: 最新温度データ
-    :param prev_temp_ser: 前年温度データ
     """
     val_min: float = np.min([curr_ser.min(), prev_ser.min()])
-    val_max: float = np.max([curr_temp_ser.max(), prev_temp_ser.max()])
+    val_max: float = np.max([curr_ser.max(), prev_ser.max()])
     val_min = np.floor(val_min / 10.) * 10.
     val_max = np.ceil(val_max / 10.) * 10.
     plot_axes.set_ylim(val_min, val_max)
 
 
-def _temperaturePlotting(
+def _temperature_plotting(
         ax_temp: Axes,
         df_curr: DataFrame, df_prev: DataFrame,
         curr_temp_ser: Series, prev_temp_ser: Series,
@@ -152,16 +145,16 @@ def _temperaturePlotting(
     :param prev_plot_label: 前年ラベル
     """
     # 最低・最高
-    setYLimWithAxes(ax_temp, curr_temp_ser, prev_temp_ser, curr_temp_ser, prev_temp_ser)
+    set_ylim_with_axes(ax_temp, curr_temp_ser, prev_temp_ser)
     # 最新年月の外気温
     ax_temp.plot(df_curr[COL_TIME], curr_temp_ser, color=CURR_COLOR, marker="")
     val_ave = curr_temp_ser.mean()
-    curr_patch = makeAvePatch(curr_plot_label, val_ave, CURR_COLOR, DICT_AVE_TEMP)
+    curr_patch = make_average_patch(curr_plot_label, val_ave, CURR_COLOR, DICT_AVEG_TEMP)
     ax_temp.axhline(val_ave, **CURR_AVEG_LINE_STYLE)
     # 前年月の外気温
     ax_temp.plot(df_prev[COL_PREV_PLOT_TIME], prev_temp_ser, color=PREV_COLOR, marker="")
     val_ave = prev_temp_ser.mean()
-    prev_patch = makeAvePatch(prev_plot_label, val_ave, PREV_COLOR, DICT_AVE_TEMP)
+    prev_patch = make_average_patch(prev_plot_label, val_ave, PREV_COLOR, DICT_AVEG_TEMP)
     ax_temp.axhline(val_ave, **PREV_AVEG_LINE_STYLE)
     ax_temp.set_ylabel(Y_LABEL_TEMP_OUT, **LABEL_STYLE)
     # 凡例
@@ -171,10 +164,10 @@ def _temperaturePlotting(
     ax_temp.label_outer()
 
 
-def _humidPlotting(ax_humid: Axes,
-                   df_curr: DataFrame, df_prev: DataFrame,
-                   curr_humid_ser: Series, prev_humid_ser: Series,
-                   curr_plot_label: str, prev_plot_label: str) -> None:
+def _humid_plotting(ax_humid: Axes,
+                    df_curr: DataFrame, df_prev: DataFrame,
+                    curr_humid_ser: Series, prev_humid_ser: Series,
+                    curr_plot_label: str, prev_plot_label: str) -> None:
     """
     湿度サブプロット(axes)に軸・軸ラベルを設定し、DataFrameオプジェクトの室内湿度データをプロットする
     """
@@ -182,12 +175,12 @@ def _humidPlotting(ax_humid: Axes,
     # 最新年月
     ax_humid.plot(df_curr[COL_TIME], curr_humid_ser, color=CURR_COLOR, marker="")
     val_ave = curr_humid_ser.mean()
-    curr_patch = makeAvePatch(curr_plot_label, val_ave, CURR_COLOR, DICT_AVEG_HUMID)
+    curr_patch = make_average_patch(curr_plot_label, val_ave, CURR_COLOR, DICT_AVEG_HUMID)
     ax_humid.axhline(val_ave, **CURR_AVEG_LINE_STYLE)
     # 前年月
     ax_humid.plot(df_prev[COL_PREV_PLOT_TIME], prev_humid_ser, color=PREV_COLOR, marker="")
     val_ave = prev_humid_ser.mean()
-    prev_patch = makeAvePatch(prev_plot_label, val_ave, PREV_COLOR, DICT_AVEG_HUMID)
+    prev_patch = make_average_patch(prev_plot_label, val_ave, PREV_COLOR, DICT_AVEG_HUMID)
     ax_humid.axhline(val_ave, **PREV_AVEG_LINE_STYLE)
     ax_humid.set_ylabel(Y_LABEL_HUMID, **LABEL_STYLE)
     # 凡例
@@ -196,7 +189,7 @@ def _humidPlotting(ax_humid: Axes,
     ax_humid.label_outer()
 
 
-def _pressurePlotting(
+def _pressure_plotting(
         ax_pressure: Axes,
         df_curr: DataFrame, df_prev: DataFrame,
         curr_pressure_ser: Series, prev_pressure_ser: Series,
@@ -204,16 +197,17 @@ def _pressurePlotting(
     """
     気圧サブプロット(axes)に軸・軸ラベルを設定し、DataFrameオプジェクトの気圧データをプロットする
     """
-    ax_pressure.set_ylim([960, 1030])
+    # 最大値と最小値からY軸範囲を設定
+    set_ylim_with_axes(ax_pressure, df_curr[COL_PRESSURE], df_prev[COL_PRESSURE])
     # 最新年月
     ax_pressure.plot(df_curr[COL_TIME], curr_pressure_ser, color=CURR_COLOR, marker="")
     val_ave = curr_pressure_ser.mean()
-    curr_patch = makeAvePatch(curr_plot_label, val_ave, CURR_COLOR, DICT_AVEG_PRESSURE)
+    curr_patch = make_average_patch(curr_plot_label, val_ave, CURR_COLOR, DICT_AVEG_PRESSURE)
     ax_pressure.axhline(val_ave, **CURR_AVEG_LINE_STYLE)
     # 前年月
     ax_pressure.plot(df_prev[COL_PREV_PLOT_TIME], prev_pressure_ser, color=PREV_COLOR, marker="")
     val_ave = prev_pressure_ser.mean()
-    prev_patch = makeAvePatch(prev_plot_label, val_ave, PREV_COLOR, DICT_AVEG_PRESSURE)
+    prev_patch = make_average_patch(prev_plot_label, val_ave, PREV_COLOR, DICT_AVEG_PRESSURE)
     ax_pressure.axhline(val_ave, **PREV_AVEG_LINE_STYLE)
     ax_pressure.set_ylabel(Y_LABEL_PRESSURE, **LABEL_STYLE)
     # 凡例
@@ -226,11 +220,21 @@ def _pressurePlotting(
 def gen_plot_image(
         df_curr: DataFrame, df_prev: DataFrame, year_month: str, prev_year_month: str,
         logger: Optional[logging.Logger] = None) -> str:
+    """
+    指定年月とその前年の観測データをプロットした画像のBase64エンコード済み文字列を生成する
+    :param df_curr: 指定年月の観測データのDataFrame
+    :param df_prev: 前年の年月の観測データのDataFrame
+    :param year_month: 指定年月 (形式: "%Y-%m")
+    :param prev_year_month: 前年の年月 (形式: "%Y-%m")
+    :param logger: application logger
+    :return: 画像のBase64エンコード済み文字列
+    """
+
     # 凡例用ラベル
     # 今年年月
-    curr_plot_label = makeLegendLabel(year_month)
+    curr_plot_label = make_legend_label(year_month)
     # 前年年月
-    prev_plot_label = makeLegendLabel(prev_year_month)
+    prev_plot_label = make_legend_label(prev_year_month)
     # タイトル
     title: str = FMT_MEASUREMENT_RANGE.format(curr_plot_label, prev_plot_label)
 
@@ -244,7 +248,9 @@ def gen_plot_image(
     curr_pressure_ser: Series = df_curr[COL_PRESSURE]
     prev_pressure_ser: Series = df_prev[COL_PRESSURE]
     # 前年データをX軸にプロットするために測定時刻列にを1年プラスする
-    df_prev[COL_PREV_PLOT_TIME] = df_prev[COL_TIME].apply(plusOneYear)
+    df_prev[COL_PREV_PLOT_TIME] = df_prev[COL_TIME].apply(datetime_plus_1_year)
+    if logger is not None:
+        logger.debug(f"{df_prev}")
 
     fig: Figure
     ax_temp: Axes
@@ -261,17 +267,17 @@ def gen_plot_image(
         ax.grid(**GRID_STYLE)
 
     # (1) 外気温領域のプロット
-    _temperaturePlotting(ax_temp,
-                         df_curr, df_prev, curr_temp_ser, prev_temp_ser,
-                         title, curr_plot_label, prev_plot_label)
+    _temperature_plotting(ax_temp,
+                          df_curr, df_prev, curr_temp_ser, prev_temp_ser,
+                          title, curr_plot_label, prev_plot_label)
     # (2) 湿度領域のプロット
-    _humidPlotting(ax_humid,
-                   df_curr, df_prev, curr_humid_ser, prev_humid_ser,
-                   curr_plot_label, prev_plot_label)
+    _humid_plotting(ax_humid,
+                    df_curr, df_prev, curr_humid_ser, prev_humid_ser,
+                    curr_plot_label, prev_plot_label)
     # (3) 気圧領域のプロット
-    _pressurePlotting(ax_pressure,
-                      df_curr, df_prev, curr_pressure_ser, prev_pressure_ser,
-                      curr_plot_label, prev_plot_label)
+    _pressure_plotting(ax_pressure,
+                       df_curr, df_prev, curr_pressure_ser, prev_pressure_ser,
+                       curr_plot_label, prev_plot_label)
 
     # 画像をバイトストリームに溜め込みそれをbase64エンコードしてレスポンスとして返す
     buf = BytesIO()
