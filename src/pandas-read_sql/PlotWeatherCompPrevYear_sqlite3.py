@@ -9,7 +9,7 @@ from sqlite3 import Error
 import pandas as pd
 from pandas.core.frame import DataFrame
 
-from plotter.plotterweather import gen_plot_image
+from plotter.plotterweather_flat import gen_plot_image
 
 """
 気象センサーデータの前年対比グラフをHTMLに出力する 

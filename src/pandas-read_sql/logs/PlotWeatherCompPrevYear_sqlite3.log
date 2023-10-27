@@ -1,5 +1,5 @@
 (py_visualize) $ python PlotWeatherCompPrevYear_sqlite3.py --sqlite3-db ~/db/weather.db --device-name esp8266_1 --year-month 2023-08
-INFO connection: <sqlite3.Connection object at 0x7f7874859240>
+INFO connection: <sqlite3.Connection object at 0x7f107df49140>
 INFO query_params: ('esp8266_1', '2023-08-01 00:00:00', '2023-09-01 00:00:00')
 INFO         measurement_time  temp_out  humid  pressure
 0    2023-07-31 15:07:04      21.6   58.7    1006.8
@@ -30,10 +30,21 @@ INFO         measurement_time  temp_out  humid  pressure
 4578 2022-08-31 14:59:16      17.4   65.5    1002.4
 
 [4579 rows x 4 columns]
-INFO fig: Figure(980x640)
-DEBUG data.len: 249316
-INFO output/PlotWeatherCompPrevYear_sqlite3.html
+DEBUG         measurement_time  temp_out  humid  pressure prev_plot_measurement_time
+0    2022-07-31 15:01:44      24.4   70.1    1008.9        2023-07-31 15:01:44
+1    2022-07-31 15:11:29      24.0   69.8    1008.7        2023-07-31 15:11:29
+2    2022-07-31 15:21:13      24.0   69.3    1008.7        2023-07-31 15:21:13
+3    2022-07-31 15:30:58      23.9   69.2    1008.9        2023-07-31 15:30:58
+4    2022-07-31 15:40:42      23.8   68.9    1009.0        2023-07-31 15:40:42
+...                  ...       ...    ...       ...                        ...
+4574 2022-08-31 14:20:20      17.3   65.1    1002.0        2023-08-31 14:20:20
+4575 2022-08-31 14:30:04      17.4   65.3    1002.1        2023-08-31 14:30:04
+4576 2022-08-31 14:39:48      17.4   65.7    1002.1        2023-08-31 14:39:48
+4577 2022-08-31 14:49:33      17.4   65.5    1002.4        2023-08-31 14:49:33
+4578 2022-08-31 14:59:16      17.4   65.5    1002.4        2023-08-31 14:59:16
 
+[4579 rows x 5 columns]
+INFO output/PlotWeatherCompPrevYear_sqlite3.html
 
 ▲ dictパラメータが使えない
 Execution failed on sql '
