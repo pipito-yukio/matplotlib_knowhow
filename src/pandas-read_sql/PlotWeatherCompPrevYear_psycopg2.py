@@ -106,9 +106,9 @@ def save_text(file, contents):
 
 
 class PgDatabase(object):
-    def __init__(self, configfile: str, hostname: str = None, logger: logging.Logger = None):
+    def __init__(self, conf_path: str, hostname: str = None, logger: logging.Logger = None):
         self.logger = logger
-        with open(configfile, 'r') as fp:
+        with open(conf_path, 'r') as fp:
             db_conf = json.load(fp)
             if hostname is None:
                 hostname = socket.gethostname()

@@ -105,14 +105,14 @@ def save_text(file, contents):
         fp.write(contents)
 
 
-def get_connection_url(file_path: str, hostname: str = None) -> URL:
+def get_engine_url(conf_path: str, hostname: str = None) -> URL:
     """
-    SQLAlchemyの接続URL用の辞書オブジェクトを取得する
-    :param file_path: 接続設定ファイルパス (JSON形式)
+    SQLAlchemyの接続URLを取得する
+    :param conf_path: 接続設定ファイルパス (JSON形式)
     :param hostname: ホスト名 ※未設定なら実行PCのホスト名
     :return: SQLAlchemyのURL用辞書オブジェクトDB_HEALTHCARE_CONF
     """
-    with open(file_path, 'r') as fp:
+    with open(conf_path, 'r') as fp:
         db_conf: json = json.load(fp)
         if hostname is None:
             hostname = socket.gethostname()
@@ -189,7 +189,7 @@ if __name__ == '__main__':
     param_year_month = args.year_month
 
     # データベース接続URL生成
-    connUrl: URL = get_connection_url(DB_CONF)
+    connUrl: URL = get_engine_url(DB_CONF)
     app_logger.info(f"connUrl: {connUrl}")
     Cls_sess: Optional[scoping.scoped_session] = None
     try:
