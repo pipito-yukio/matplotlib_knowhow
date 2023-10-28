@@ -12,7 +12,6 @@ import sqlalchemy.orm.scoping as scoping
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import URL
-from sqlalchemy.sql import text
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from plotter.plotterweather import gen_plot_image
@@ -53,11 +52,11 @@ SELECT
 FROM
    weather.t_weather
 WHERE
-   did=(SELECT id FROM weather.t_device WHERE name=:deviceName)
+   did=(SELECT id FROM weather.t_device WHERE name=%(deviceName)s)
    AND (
-      measurement_time >=:fromDate
+      measurement_time >= %(fromDate)s
       AND
-      measurement_time <:toDate
+      measurement_time < %(toDate)s
    )
 ORDER BY measurement_time;
 """
@@ -134,7 +133,7 @@ def get_dataframe(scoped_sess: scoped_session,
     try:
         with scoped_sess.connection() as conn:
             df: pd.DataFrame = pd.read_sql(
-                text(QUERY_RANGE_DATA), conn,
+                QUERY_RANGE_DATA, conn,
                 params=query_params,
                 parse_dates=[COL_TIME]
             )
@@ -152,17 +151,19 @@ def get_all_df(cls_sess: scoping.scoped_session,
     sess: scoped_session = cls_sess()
     if logger is not None:
         logger.info(f"scoped_sess: {sess}")
+
+    df_curr: Optional[DataFrame]
     df_prev: Optional[DataFrame]
     try:
         # 今年の年月テータ取得
-        df_curr: DataFrame = get_dataframe(sess, device_name, curr_year_month, logger=logger)
+        df_curr = get_dataframe(sess, device_name, curr_year_month, logger=logger)
         if df_curr is not None and df_curr.shape[0] == 0:
             return None, None, curr_year_month
 
         # 前年の年月テータ取得
         # 前年計算
         prev_ym: str = previous_year_month(curr_year_month)
-        df_prev: DataFrame = get_dataframe(sess, device_name, prev_ym, logger=logger)
+        df_prev = get_dataframe(sess, device_name, prev_ym, logger=logger)
         return df_curr, df_prev, prev_ym
     finally:
         cls_sess.remove()
@@ -180,7 +181,7 @@ if __name__ == '__main__':
     # 最新の検索年月
     parser.add_argument("--year-month", type=str, required=True,
                         help="2023-04")
-    # ホスト名 ※任意 (例) raspi-4
+    # データベースサーバーのホスト名 ※任意 (例) raspi-4
     parser.add_argument("--db-host", type=str, help="Other database hostname.")
     args: argparse.Namespace = parser.parse_args()
     # デバイス名

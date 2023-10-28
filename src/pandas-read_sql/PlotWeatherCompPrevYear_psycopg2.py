@@ -55,9 +55,9 @@ FROM
 WHERE
    did=(SELECT id FROM weather.t_device WHERE name=%(deviceName)s)
    AND (
-     measurement_time >= to_timestamp(%(fromDate)s, 'YYYY-MM-DD HH24::MI:SS')
+     measurement_time >= %(fromDate)s
      AND
-     measurement_time < to_timestamp(%(toDate)s, 'YYYY-MM-DD HH24:MI:SS')
+     measurement_time < %(toDate)s
    )
 ORDER BY measurement_time;
 """
@@ -228,7 +228,7 @@ if __name__ == '__main__':
     # 最新の検索年月
     parser.add_argument("--year-month", type=str, required=True,
                         help="2023-04")
-    # ホスト名 ※任意 (例) raspi-4
+    # データベースサーバーのホスト名 ※任意 (例) raspi-4
     parser.add_argument("--db-host", type=str, help="Other database hostname.")
     args: argparse.Namespace = parser.parse_args()
     # デバイス名
