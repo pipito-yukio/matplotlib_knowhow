@@ -83,17 +83,20 @@ COL_TIME: str = "measurement_time"
 # [NG] pyformat: Python extended format codes, e.g. ...WHERE name=%(name)s
 
 # 気象センサーデバイス名と期間から気象観測データを取得するSQL (SQLite3専用)
+#  strftime('%s',,): seconds since 1970-01-01 (unix timestamp)
+#  strftime(,,'-9 hours'): 逆にUTCから9時間(JST日本時間)を引く必要がある
 QUERY_RANGE_DATA: str = """
 SELECT
-   measurement_time, temp_out, humid, pressure
+   datetime(measurement_time, 'unixepoch', 'localtime') as measurement_time 
+   ,temp_out, humid, pressure
 FROM
    t_weather
 WHERE
    did=(SELECT id FROM t_device WHERE name=?)
    AND (
-      datetime(measurement_time,'unixepoch','localtime') >= ?
+      measurement_time >= strftime('%s', ? ,'-9 hours')
       AND
-      datetime(measurement_time,'unixepoch','localtime') < ?
+      measurement_time < strftime('%s', ? ,'-9 hours')
    )
 ORDER BY measurement_time;
 """
