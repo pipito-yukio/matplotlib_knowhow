@@ -1,10 +1,9 @@
-(py_visualize) $ python PlotWeatherCompPrevYear_sqlalchemy.py --device-name esp8266_1 --year-month 2023-08
-INFO connUrl: postgresql+psycopg2://developer:***@Dell-T7500.local:5432/sensors_pgdb
-INFO db_engine: Engine(postgresql+psycopg2://developer:***@Dell-T7500.local:5432/sensors_pgdb)
-INFO sess_factory: sessionmaker(class_='Session', bind=Engine(postgresql+psycopg2://developer:***@Dell-T7500.local:5432/sensors_pgdb), autoflush=True, expire_on_commit=True)
-INFO Session class: <sqlalchemy.orm.scoping.scoped_session object at 0x7ff5a786d300>
-INFO scoped_sess: <sqlalchemy.orm.session.Session object at 0x7ff5a786d360>
-INFO query_params: {'deviceName': 'esp8266_1', 'fromDate': '2023-08-01', 'toDate': '2023-09-01'}
+(py_visualize) $ python PlotWeatherCompPrevYear_sqlalchemy.py --device-name esp8266_1 --year-month 2023-08 --db-host raspi-4
+INFO connUrl: postgresql+psycopg2://developer:***@raspi-4.local:5432/sensors_pgdb
+INFO db_engine: Engine(postgresql+psycopg2://developer:***@raspi-4.local:5432/sensors_pgdb)
+INFO sess_factory: sessionmaker(class_='Session', bind=Engine(postgresql+psycopg2://developer:***@raspi-4.local:5432/sensors_pgdb), autoflush=True, expire_on_commit=True)
+INFO Session class: <sqlalchemy.orm.scoping.scoped_session object at 0x7f6611f45300>
+INFO scoped_sess: <sqlalchemy.orm.session.Session object at 0x7f6611f45360>INFO query_params: {'deviceName': 'esp8266_1', 'fromDate': '2023-08-01', 'toDate': '2023-09-01'}
 INFO         measurement_time  temp_out  humid  pressure
 0    2023-08-01 00:07:04      21.6   58.7    1006.8
 1    2023-08-01 00:16:48      21.7   59.1    1006.8

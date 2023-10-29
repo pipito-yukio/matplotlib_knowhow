@@ -190,7 +190,7 @@ if __name__ == '__main__':
     param_year_month = args.year_month
 
     # データベース接続URL生成
-    connUrl: URL = get_engine_url(DB_CONF)
+    connUrl: URL = get_engine_url(DB_CONF, args.db_host)
     app_logger.info(f"connUrl: {connUrl}")
     Cls_sess: Optional[scoping.scoped_session] = None
     try:

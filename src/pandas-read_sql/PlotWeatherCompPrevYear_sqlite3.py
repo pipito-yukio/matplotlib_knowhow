@@ -170,7 +170,7 @@ def get_dataframe(connection: sqlite3.Connection,
     # sql.py
     # params : list, tuple or dict, optional, default: None
     query_params: Tuple = (
-        device_name, from_date + " 00:00:00", exclude_to_date + " 00:00:00",
+        device_name, from_date, exclude_to_date,
     )
     if logger is not None:
         logger.info(f"query_params: {query_params}")
