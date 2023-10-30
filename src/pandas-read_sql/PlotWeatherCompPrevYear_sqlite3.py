@@ -217,7 +217,7 @@ if __name__ == '__main__':
     # データベースパス
     db_path: str = os.path.expanduser(args.sqlite3_db)
     if not os.path.exists(db_path):
-        app_logger.warning("Requireormat is 'YYYY-MM'")
+        app_logger.warning("database not found!")
         exit(1)
 
     # デバイス名
